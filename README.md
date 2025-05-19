@@ -41,26 +41,26 @@ A simple, modern disposable email web app built with Next.js, Tailwind CSS, and 
 ### Installation
 
 1. **Clone** the repo  
-   ```bash
-   git clone https://github.com/isawebapp/Mailsy.git
-   cd mailsy
+```bash
+git clone https://github.com/isawebapp/Mailsy.git
+cd mailsy
 ```
 
 2. **Install** dependencies
 
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
+```bash
+npm install
+# or
+yarn install
+```
 
 3. **Run** in development
 
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   ```
+```bash
+npm run dev
+# or
+yarn dev
+```
 
    Open [http://localhost:3000](http://localhost:3000) in your browser.
 
