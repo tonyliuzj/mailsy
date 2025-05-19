@@ -1,4 +1,3 @@
-````markdown
 # Mailsy — Disposable Email Service
 
 A simple, modern disposable email web app built with Next.js, Tailwind CSS, and SQLite.  Users can generate random, one-off email addresses (protected by Cloudflare Turnstile CAPTCHA) and watch incoming mail in real time via IMAP polling.  An admin panel lets you configure IMAP, domain, and CAPTCHA keys, and manage your admin password.
