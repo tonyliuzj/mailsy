@@ -22,8 +22,7 @@ db.prepare(`
     imap_port INTEGER,
     imap_user TEXT,
     imap_password TEXT,
-    imap_tls INTEGER,
-    domain TEXT
+    imap_tls INTEGER
   )
 `).run()
 
@@ -60,17 +59,15 @@ export function getConfig() {
         imap_port,
         imap_user,
         imap_password,
-        imap_tls,
-        domain
-      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        imap_tls
+      ) VALUES (?, ?, ?, ?, ?, ?)
     `).run(
       1,      // id
       '',     // imap_host
       993,    // imap_port
       '',     // imap_user
       '',     // imap_password
-      1,      // imap_tls (INTEGER 0/1)
-      ''     // domain
+      1      // imap_tls (INTEGER 0/1)
     )
     cfg = db.prepare('SELECT * FROM config WHERE id = 1').get()
   }
@@ -85,8 +82,7 @@ export function updateConfig({
   imap_port,
   imap_user,
   imap_password,
-  imap_tls,
-  domain
+  imap_tls
 }) {
   return db.prepare(`
     UPDATE config SET
@@ -94,15 +90,13 @@ export function updateConfig({
       imap_port          = ?,
       imap_user          = ?,
       imap_password      = ?,
-      imap_tls           = ?,
-      domain             = ?
+      imap_tls           = ?
     WHERE id = 1
   `).run(
     imap_host,
     imap_port,
     imap_user,
     imap_password,
-    imap_tls ? 1 : 0,
-    domain
+    imap_tls ? 1 : 0
   )
 }

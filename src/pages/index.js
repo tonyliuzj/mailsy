@@ -11,7 +11,7 @@ export default function Home() {
   const seenUids = useRef(new Set())
   const widgetIdRef = useRef(null)
 
-  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY;
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY
 
   useEffect(() => {
     if (!siteKey || !showCaptcha) return
@@ -103,6 +103,7 @@ export default function Home() {
     const first = (text || '').split('\n')[0]
     return first.length > 50 ? first.slice(0, 50) + '…' : first
   }
+
   const copyEmail = () => email && navigator.clipboard.writeText(email)
 
   return (

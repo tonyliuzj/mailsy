@@ -3,29 +3,41 @@ import { generate as randomWords } from 'random-words'
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST'])
-    return res.status(405).end()
+    return res.status(405).json({ error: 'Method not allowed' })
   }
 
   const { cf_turnstile_token } = req.body
-  const secret = process.env.TURNSTILE_SECRET;
+  const secret = process.env.TURNSTILE_SECRET
+  const domain = process.env.DOMAIN
 
   if (!secret) {
-    console.error('[generate] Turnstile secret not set in config')
+    console.error('[generate] Turnstile secret not set')
     return res.status(500).json({ error: 'CAPTCHA not configured' })
   }
+  if (!domain) {
+    console.error('[generate] Email domain not set')
+    return res.status(500).json({ error: 'Email domain not configured' })
+  }
 
-  const verification = await fetch(
-    'https://challenges.cloudflare.com/turnstile/v0/siteverify',
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        secret,
-        response: cf_turnstile_token,
-        remoteip: req.socket.remoteAddress || ''
-      })
-    }
-  ).then(r => r.json())
+  let verification
+  try {
+    const resp = await fetch(
+      'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          secret,
+          response: cf_turnstile_token,
+          remoteip: req.socket.remoteAddress || ''
+        })
+      }
+    )
+    verification = await resp.json()
+  } catch (err) {
+    console.error('[generate] CAPTCHA verification error', err)
+    return res.status(500).json({ error: 'Error verifying CAPTCHA' })
+  }
 
   if (!verification.success) {
     console.error('[generate] CAPTCHA verification failed:', verification)
@@ -33,7 +45,6 @@ export default async function handler(req, res) {
   }
 
   const alias = randomWords({ exactly: 2, join: '.' })
-  const domain = cfg.domain
   const email = `${alias}@${domain}`
 
   return res.status(200).json({ email })
