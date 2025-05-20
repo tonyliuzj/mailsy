@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import Link from 'next/link'
 
 export default function Home() {
   const [email, setEmail] = useState('')
@@ -115,7 +116,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="text-xl font-bold">Mailsy</div>
           <div className="space-x-6 text-gray-600">
-            <a href="/" className="hover:text-gray-900">Home</a>
+            <Link href="/" className="hover:text-gray-900">Home</Link>
           </div>
         </div>
       </nav>

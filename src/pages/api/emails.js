@@ -18,7 +18,7 @@ export default async function handler(req, res) {
   try {
     cfg = getConfig()
   } catch (err) {
-    return res.status(500).json({ error: 'Failed to load config' })
+    return res.status(500).json({ error: 'Failed to load configuration.' })
   }
 
   const imap = new Imap({
@@ -41,10 +41,10 @@ export default async function handler(req, res) {
 
     imap.once('ready', () => {
       imap.openBox('INBOX', true, err => {
-        if (err) return finish(500, { error: err.message })
+        if (err) return finish(500, { error: 'Failed to open mailbox.' })
 
         imap.search([['HEADER', 'TO', email]], (err, uids) => {
-          if (err) return finish(500, { error: err.message })
+          if (err) return finish(500, { error: 'Failed to search mailbox.' })
 
           const list = Array.isArray(uids) ? uids : []
           if (list.length === 0) return finish(200, { emails: [] })
@@ -70,8 +70,7 @@ export default async function handler(req, res) {
                     text: parsed.text,
                   })
                 })
-                .catch(parseErr => {
-                })
+                .catch(() => {})
               parsePromises.push(p)
             })
           })
@@ -82,12 +81,12 @@ export default async function handler(req, res) {
             finish(200, { emails: messages })
           })
 
-          f.once('error', fetchErr => finish(500, { error: fetchErr.message }))
+          f.once('error', () => finish(500, { error: 'An error occurred while fetching emails.' }))
         })
       })
     })
 
-    imap.once('error', err => finish(500, { error: err.message }))
+    imap.once('error', () => finish(500, { error: 'A connection error occurred.' }))
     imap.connect()
   })
 }
