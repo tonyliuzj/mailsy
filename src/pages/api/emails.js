@@ -17,7 +17,7 @@ export default async function handler(req, res) {
   let cfg
   try {
     cfg = getConfig()
-  } catch (err) {
+  } catch {
     return res.status(500).json({ error: 'Failed to load configuration.' })
   }
 
@@ -40,9 +40,7 @@ export default async function handler(req, res) {
     }
 
     imap.once('ready', () => {
-      imap.openBox('INBOX', true, err => {
-        if (err) return finish(500, { error: 'Failed to open mailbox.' })
-
+      imap.openBox('INBOX', true, () => {
         imap.search([['HEADER', 'TO', email]], (err, uids) => {
           if (err) return finish(500, { error: 'Failed to search mailbox.' })
 
