@@ -10,6 +10,7 @@ export default function Home() {
   const [started, setStarted] = useState(false)
   const seenUids = useRef(new Set())
   const widgetIdRef = useRef(null)
+  const title = process.env.NEXT_PUBLIC_TITLE;
 
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY
 
@@ -110,7 +111,7 @@ export default function Home() {
     <>
       <nav className="bg-white shadow">
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="text-xl font-bold">Mailsy</div>
+          <div className="text-xl font-bold">{title}</div>
           <div className="space-x-6 text-gray-600">
             <Link href="/" className="hover:text-gray-900">Home</Link>
           </div>
