@@ -174,12 +174,24 @@ export default function Home() {
                 >
                   ← Back
                 </button>
-                <h2 className="text-lg font-semibold mb-2">{selectedEmail.subject || '(no subject)'}</h2>
+                <h2 className="text-lg font-semibold mb-2">
+                  {selectedEmail.subject || '(no subject)'}
+                </h2>
                 <p className="text-xs text-gray-600 mb-4">
-                  From: {selectedEmail.from} — {new Date(selectedEmail.date).toLocaleString()}
+                  From: {selectedEmail.from} —{' '}
+                  {new Date(selectedEmail.date).toLocaleString()}
                 </p>
                 <div className="flex-1 overflow-y-auto border-t pt-2">
-                  <pre className="whitespace-pre-wrap text-sm">{selectedEmail.text}</pre>
+                  {selectedEmail.html ? (
+                    <div
+                      className="space-y-4 text-sm text-gray-800 break-words"
+                      dangerouslySetInnerHTML={{ __html: selectedEmail.html }}
+                    />
+                  ) : (
+                    <pre className="whitespace-pre-wrap break-words text-sm text-gray-800 space-y-2">
+                      {selectedEmail.text}
+                    </pre>
+                  )}
                 </div>
               </div>
             ) : (

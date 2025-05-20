@@ -3,10 +3,9 @@ import { simpleParser } from 'mailparser'
 import { getConfig } from '../../lib/db'
 
 export default async function handler(req, res) {
-
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST'])
-    return res.status(405).end()
+    return res.status(405).json({ error: 'Method not allowed' })
   }
 
   const { email } = req.body
@@ -66,6 +65,7 @@ export default async function handler(req, res) {
                     from: parsed.from?.text,
                     date: parsed.date,
                     text: parsed.text,
+                    html: parsed.html || null
                   })
                 })
                 .catch(() => {})
