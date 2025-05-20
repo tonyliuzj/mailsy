@@ -106,7 +106,7 @@ export default function AdminPage({ admin }) {
             </label>
           ))}
 
-          <label className="block flex items-center">
+          <label className="block items-center">
             <input
               type="checkbox"
               name="imap_tls"
@@ -127,28 +127,6 @@ export default function AdminPage({ admin }) {
               className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
               value={form.domain}
               onChange={e => setForm({ ...form, domain: e.target.value })}
-            />
-          </label>
-
-          <label className="block">
-            <span className="block font-medium">Cloudflare Turnstile Site Key</span>
-            <input
-              type="text"
-              name="turnstile_sitekey"
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
-              value={form.turnstile_sitekey}
-              onChange={e => setForm({ ...form, turnstile_sitekey: e.target.value })}
-            />
-          </label>
-
-          <label className="block">
-            <span className="block font-medium">Cloudflare Turnstile Secret</span>
-            <input
-              type="text"
-              name="turnstile_secret"
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
-              value={form.turnstile_secret}
-              onChange={e => setForm({ ...form, turnstile_secret: e.target.value })}
             />
           </label>
 

@@ -27,17 +27,6 @@ db.prepare(`
   )
 `).run()
 
-{
-  const info = db.prepare(`PRAGMA table_info(config)`).all()
-  const cols = info.map(col => col.name)
-  if (!cols.includes('turnstile_sitekey')) {
-    db.prepare(`ALTER TABLE config ADD COLUMN turnstile_sitekey TEXT`).run()
-  }
-  if (!cols.includes('turnstile_secret')) {
-    db.prepare(`ALTER TABLE config ADD COLUMN turnstile_secret TEXT`).run()
-  }
-}
-
 const existingAdmin = db
   .prepare('SELECT 1 FROM admin WHERE username = ?')
   .get('admin')
@@ -72,10 +61,8 @@ export function getConfig() {
         imap_user,
         imap_password,
         imap_tls,
-        domain,
-        turnstile_sitekey,
-        turnstile_secret
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        domain
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)
     `).run(
       1,      // id
       '',     // imap_host
@@ -83,16 +70,12 @@ export function getConfig() {
       '',     // imap_user
       '',     // imap_password
       1,      // imap_tls (INTEGER 0/1)
-      '',     // domain
-      '',     // turnstile_sitekey
-      ''      // turnstile_secret
+      ''     // domain
     )
     cfg = db.prepare('SELECT * FROM config WHERE id = 1').get()
   }
 
   cfg.imap_tls = Boolean(cfg.imap_tls)
-  cfg.turnstile_sitekey = cfg.turnstile_sitekey || ''
-  cfg.turnstile_secret   = cfg.turnstile_secret   || ''
 
   return cfg
 }
@@ -103,9 +86,7 @@ export function updateConfig({
   imap_user,
   imap_password,
   imap_tls,
-  domain,
-  turnstile_sitekey,
-  turnstile_secret
+  domain
 }) {
   return db.prepare(`
     UPDATE config SET
@@ -114,9 +95,7 @@ export function updateConfig({
       imap_user          = ?,
       imap_password      = ?,
       imap_tls           = ?,
-      domain             = ?,
-      turnstile_sitekey  = ?,
-      turnstile_secret   = ?
+      domain             = ?
     WHERE id = 1
   `).run(
     imap_host,
@@ -124,8 +103,6 @@ export function updateConfig({
     imap_user,
     imap_password,
     imap_tls ? 1 : 0,
-    domain,
-    turnstile_sitekey,
-    turnstile_secret
+    domain
   )
 }

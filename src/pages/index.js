@@ -6,17 +6,12 @@ export default function Home() {
   const [inbox, setInbox] = useState([])
   const [selectedEmail, setSelectedEmail] = useState(null)
   const [countdown, setCountdown] = useState(5)
-  const [siteKey, setSiteKey] = useState('')
   const [showCaptcha, setShowCaptcha] = useState(false)
   const [started, setStarted] = useState(false)
   const seenUids = useRef(new Set())
   const widgetIdRef = useRef(null)
 
-  useEffect(() => {
-    fetch('/api/admin/config')
-      .then(r => r.json())
-      .then(cfg => cfg.turnstile_sitekey && setSiteKey(cfg.turnstile_sitekey))
-  }, [])
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY;
 
   useEffect(() => {
     if (!siteKey || !showCaptcha) return

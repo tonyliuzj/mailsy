@@ -1,4 +1,3 @@
-import { getConfig } from '../../lib/db'
 import { generate as randomWords } from 'random-words'
 
 export default async function handler(req, res) {
@@ -8,8 +7,7 @@ export default async function handler(req, res) {
   }
 
   const { cf_turnstile_token } = req.body
-  const cfg = getConfig()
-  const secret = cfg.turnstile_secret
+  const secret = process.env.TURNSTILE_SECRET;
 
   if (!secret) {
     console.error('[generate] Turnstile secret not set in config')
