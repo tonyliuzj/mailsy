@@ -3,6 +3,7 @@ import Link from 'next/link'
 
 export default function Home({ siteTitle }) {
   const [email, setEmail] = useState('')
+  const [apiKey, setApiKey] = useState('') // <--- NEW STATE
   const [inbox, setInbox] = useState([])
   const [selectedEmail, setSelectedEmail] = useState(null)
   const [countdown, setCountdown] = useState(5)
@@ -10,9 +11,6 @@ export default function Home({ siteTitle }) {
   const [started, setStarted] = useState(false)
   const seenUids = useRef(new Set())
   const widgetIdRef = useRef(null)
-
-  // This is now provided by _app.js, not env!
-  // const title = process.env.NEXT_PUBLIC_TITLE;
 
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY
 
@@ -46,8 +44,11 @@ export default function Home({ siteTitle }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ cf_turnstile_token: token }),
     })
-    const { email: alias } = await res.json()
-    if (alias) setEmail(alias)
+    const { email: alias, apiKey: key } = await res.json()
+    if (alias && key) {
+      setEmail(alias)
+      setApiKey(key)
+    }
   }
 
   const onGenerateClick = () => {
@@ -55,6 +56,7 @@ export default function Home({ siteTitle }) {
       setShowCaptcha(true)
     } else {
       setEmail('')
+      setApiKey('')  // <--- CLEAR API KEY WHEN RESETTING
       setStarted(false)
       setShowCaptcha(false)
       seenUids.current.clear()
@@ -65,28 +67,28 @@ export default function Home({ siteTitle }) {
   }
 
   const fetchEmails = useCallback(async () => {
-    if (!email) return
+    if (!email || !apiKey) return
     try {
       const res = await fetch('/api/emails', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, apiKey }), // <--- SEND BOTH
       })
       const { emails } = await res.json()
-      const newOnes = emails.filter(m => {
+      const newOnes = emails?.filter(m => {
         if (seenUids.current.has(m.uid)) return false
         seenUids.current.add(m.uid)
         return true
-      })
+      }) || []
       if (newOnes.length) setInbox(prev => [...newOnes, ...prev])
     } catch (err) {
       console.error(err)
     }
-  }, [email])
+  }, [email, apiKey])
 
   useEffect(() => {
     let timer
-    if (started && email) {
+    if (started && email && apiKey) {
       fetchEmails()
       setCountdown(5)
       timer = setInterval(() => {
@@ -100,7 +102,7 @@ export default function Home({ siteTitle }) {
       }, 1000)
     }
     return () => clearInterval(timer)
-  }, [started, email, fetchEmails])
+  }, [started, email, apiKey, fetchEmails])
 
   const getSnippet = text => {
     const first = (text || '').split('\n')[0]

@@ -1,7 +1,9 @@
 import { generate as randomWords } from 'random-words'
+import { nanoid } from 'nanoid'
 import { getConfig } from '../../lib/db'
+import { withSessionRoute } from '../../lib/session'
 
-export default async function handler(req, res) {
+export default withSessionRoute(async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST'])
     return res.status(405).json({ error: 'Method not allowed' })
@@ -51,5 +53,10 @@ export default async function handler(req, res) {
   const alias = randomWords({ exactly: 2, join: '.' })
   const email = `${alias}@${domain}`
 
-  return res.status(200).json({ email })
-}
+  // Generate a temp API key and store in session
+  const apiKey = nanoid(32)
+  req.session.set('email_api_key', { email, apiKey })
+  await req.session.save()
+
+  return res.status(200).json({ email, apiKey })
+})

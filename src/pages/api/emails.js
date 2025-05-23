@@ -1,16 +1,28 @@
 import Imap from 'node-imap'
 import { simpleParser } from 'mailparser'
 import { getConfig } from '../../lib/db'
+import { withSessionRoute } from '../../lib/session'
 
-export default async function handler(req, res) {
+export default withSessionRoute(async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST'])
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const { email } = req.body
-  if (!email) {
-    return res.status(400).json({ error: 'Email is required' })
+  // Require email and apiKey in the POST body
+  const { email, apiKey } = req.body
+  if (!email || !apiKey) {
+    return res.status(400).json({ error: 'Email and apiKey are required' })
+  }
+
+  // Validate session's email/apiKey
+  const sessionData = req.session.get('email_api_key')
+  if (
+    !sessionData ||
+    sessionData.email !== email ||
+    sessionData.apiKey !== apiKey
+  ) {
+    return res.status(401).json({ error: 'Unauthorized: Invalid or expired API key' })
   }
 
   let cfg
@@ -87,4 +99,4 @@ export default async function handler(req, res) {
     imap.once('error', () => finish(500, { error: 'A connection error occurred.' }))
     imap.connect()
   })
-}
+})
