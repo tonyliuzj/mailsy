@@ -1,4 +1,5 @@
 import { generate as randomWords } from 'random-words'
+import { getConfig } from '../../lib/db'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -8,7 +9,10 @@ export default async function handler(req, res) {
 
   const { cf_turnstile_token } = req.body
   const secret = process.env.TURNSTILE_SECRET
-  const domain = process.env.DOMAIN
+
+  // Get domain from database config, not env!
+  const cfg = getConfig()
+  const domain = cfg.domain
 
   if (!secret) {
     console.error('[generate] Turnstile secret not set')

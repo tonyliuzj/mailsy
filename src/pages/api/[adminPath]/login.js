@@ -1,8 +1,13 @@
 import bcrypt from 'bcryptjs'
 import { withSessionRoute } from '../../../lib/session'
-import { getAdmin } from '../../../lib/db'
+import { getAdmin, getAdminPath } from '../../../lib/db'
 
 export default withSessionRoute(async (req, res) => {
+  const { adminPath } = req.query
+  if (adminPath !== getAdminPath()) {
+    return res.status(404).json({ error: 'Not found' })
+  }
+
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST'])
     return res.status(405).end()

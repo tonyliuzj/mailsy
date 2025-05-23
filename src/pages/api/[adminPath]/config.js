@@ -1,7 +1,12 @@
 import { withSessionRoute } from '../../../lib/session'
-import { getConfig, updateConfig } from '../../../lib/db'
+import { getConfig, updateConfig, getAdminPath } from '../../../lib/db'
 
 export default withSessionRoute(async (req, res) => {
+  const { adminPath } = req.query
+  if (adminPath !== getAdminPath()) {
+    return res.status(404).json({ error: 'Not found' })
+  }
+
   const admin = req.session.get('admin')
   if (!admin) {
     return res.status(401).json({ error: 'Unauthorized' })

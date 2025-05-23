@@ -1,8 +1,27 @@
 import { useState } from 'react'
 import { useRouter } from 'next/router'
+import { withSessionSsr } from '../../lib/session'
 
-export default function Login() {
-  const [username, setUsername] = useState('admin')
+export const getServerSideProps = withSessionSsr(async ({ req, params }) => {
+  const { getAdminPath } = await import('../../lib/db')
+  const currentAdminPath = getAdminPath()
+  if (!params || params.adminPath !== currentAdminPath) {
+    return { notFound: true }
+  }
+  const admin = req.session.get('admin')
+  if (admin) {
+    return {
+      redirect: {
+        destination: `/${currentAdminPath}`,
+        permanent: false,
+      },
+    }
+  }
+  return { props: { adminPath: currentAdminPath } }
+})
+
+export default function Login({ adminPath }) {
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const router = useRouter()
@@ -10,12 +29,12 @@ export default function Login() {
   const submit = async e => {
     e.preventDefault()
     setError('')
-    const res = await fetch('/api/admin/login', {
+    const res = await fetch(`/api/${adminPath}/login`, {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ username, password }),
     })
-    if (res.ok) router.push('/admin')
+    if (res.ok) router.push(`/${adminPath}`)
     else {
       const { error: msg } = await res.json()
       setError(msg || 'Login failed')
@@ -32,13 +51,20 @@ export default function Login() {
           Username
           <input value={username}
                  onChange={e => setUsername(e.target.value)}
-                 className="w-full border p-2 rounded mt-1"/>
+                 className="w-full border p-2 rounded mt-1"
+                 autoFocus
+                 autoComplete="username"
+                 required
+          />
         </label>
         <label className="block mb-4">
           Password
           <input type="password" value={password}
                  onChange={e => setPassword(e.target.value)}
-                 className="w-full border p-2 rounded mt-1"/>
+                 className="w-full border p-2 rounded mt-1"
+                 autoComplete="current-password"
+                 required
+          />
         </label>
         <button type="submit"
                 className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded">

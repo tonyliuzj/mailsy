@@ -1,8 +1,13 @@
 import bcrypt from 'bcryptjs'
 import { withSessionRoute } from '../../../lib/session'
-import { getAdmin, updateAdminPassword } from '../../../lib/db'
+import { getAdmin, updateAdminPassword, getAdminPath } from '../../../lib/db'
 
 export default withSessionRoute(async (req, res) => {
+  const { adminPath } = req.query
+  if (adminPath !== getAdminPath()) {
+    return res.status(404).json({ error: 'Not found' })
+  }
+
   const sessionAdmin = req.session.get('admin')
   if (!sessionAdmin) {
     return res.status(401).json({ error: 'Unauthorized' })
