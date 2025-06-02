@@ -7,7 +7,6 @@ const dbPath = path.join(process.cwd(), 'data', 'temp-mail.db')
 fs.mkdirSync(path.dirname(dbPath), { recursive: true })
 const db = new Database(dbPath)
 
-// Ensure tables exist
 db.prepare(`
   CREATE TABLE IF NOT EXISTS admin (
     id INTEGER PRIMARY KEY,
@@ -30,11 +29,9 @@ db.prepare(`
   )
 `).run()
 
-// Try to add new columns if they do not exist (safe to run multiple times)
 try { db.prepare('ALTER TABLE config ADD COLUMN domain TEXT').run() } catch {}
 try { db.prepare('ALTER TABLE config ADD COLUMN title TEXT').run() } catch {}
 
-// Ensure there's always a row for config (id=1)
 let cfg = db.prepare('SELECT * FROM config WHERE id = 1').get()
 if (!cfg) {
   db.prepare(`
@@ -50,20 +47,19 @@ if (!cfg) {
       title
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
-    1,      // id
-    '',     // imap_host
-    993,    // imap_port
-    '',     // imap_user
-    '',     // imap_password
-    1,      // imap_tls (INTEGER 0/1)
-    'admin',// admin_path default
-    'example.com', // domain default
-    'example.com'  // title default
+    1,
+    '',
+    993,
+    '',
+    '',
+    1,
+    'admin',
+    'example.com',
+    'example.com'
   )
   cfg = db.prepare('SELECT * FROM config WHERE id = 1').get()
 }
 
-// Use env vars for admin username and password only if no admin exists
 const defaultAdminUsername = process.env.ADMIN_USERNAME || 'admin'
 const defaultAdminPassword = process.env.ADMIN_PASSWORD || 'changeme'
 
@@ -110,7 +106,6 @@ export function getConfig() {
     )
     cfg = db.prepare('SELECT * FROM config WHERE id = 1').get()
   }
-  // Fallback for pre-existing DBs with blank fields
   if (!cfg.domain) cfg.domain = 'example.com'
   if (!cfg.title) cfg.title = 'example.com'
   cfg.imap_tls = Boolean(cfg.imap_tls)
@@ -146,8 +141,6 @@ export function updateConfig({
     title
   )
 }
-
-// --- Dynamic admin path support ---
 
 export function getAdminPath() {
   const row = db.prepare('SELECT admin_path FROM config WHERE id = 1').get()

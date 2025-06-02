@@ -3,7 +3,6 @@ import { useRouter } from 'next/router'
 import { withSessionSsr } from '../../lib/session'
 
 export const getServerSideProps = withSessionSsr(async ({ req, params }) => {
-  // Only allow the current admin path
   const { getAdminPath } = await import('../../lib/db')
   const currentAdminPath = getAdminPath()
   if (!params || params.adminPath !== currentAdminPath) {
@@ -100,7 +99,6 @@ export default function AdminPage({ admin, adminPath }) {
       setPathMsg('Admin path must be at least 3 characters.')
       return
     }
-    // Always call the config-path endpoint under the current adminPath!
     const res = await fetch(`/api/${adminPath}/config-path`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -139,7 +137,6 @@ export default function AdminPage({ admin, adminPath }) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Mail & CAPTCHA Configuration */}
           <div className="bg-white rounded-xl shadow-lg p-6">
             <form onSubmit={saveConfig} className="space-y-4">
               <h2 className="text-xl font-semibold border-b pb-2 mb-3">Mail & CAPTCHA Configuration</h2>
@@ -212,7 +209,6 @@ export default function AdminPage({ admin, adminPath }) {
             </form>
           </div>
 
-          {/* Change Password */}
           <div className="bg-white rounded-xl shadow-lg p-6">
             <form onSubmit={changePwd} className="space-y-4">
               <h2 className="text-xl font-semibold border-b pb-2 mb-3">Change Admin Password</h2>
@@ -247,7 +243,6 @@ export default function AdminPage({ admin, adminPath }) {
             </form>
           </div>
 
-          {/* Change Username */}
           <div className="bg-white rounded-xl shadow-lg p-6">
             <form onSubmit={changeUsername} className="space-y-4">
               <h2 className="text-xl font-semibold border-b pb-2 mb-3">Change Admin Username</h2>
@@ -272,7 +267,6 @@ export default function AdminPage({ admin, adminPath }) {
             </form>
           </div>
 
-          {/* Change Admin Path */}
           <div className="bg-white rounded-xl shadow-lg p-6">
             <form onSubmit={changeAdminPath} className="space-y-4">
               <h2 className="text-xl font-semibold border-b pb-2 mb-3">Change Admin Path</h2>

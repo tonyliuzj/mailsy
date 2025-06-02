@@ -9,13 +9,11 @@ export default withSessionRoute(async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  // Require email and apiKey in the POST body
   const { email, apiKey } = req.body
   if (!email || !apiKey) {
     return res.status(400).json({ error: 'Email and apiKey are required' })
   }
 
-  // Validate session's email/apiKey
   const sessionData = req.session.get('email_api_key')
   if (
     !sessionData ||

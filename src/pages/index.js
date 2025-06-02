@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export default function Home({ siteTitle }) {
   const [email, setEmail] = useState('')
-  const [apiKey, setApiKey] = useState('') // <--- NEW STATE
+  const [apiKey, setApiKey] = useState('')
   const [inbox, setInbox] = useState([])
   const [selectedEmail, setSelectedEmail] = useState(null)
   const [countdown, setCountdown] = useState(5)
@@ -56,7 +56,7 @@ export default function Home({ siteTitle }) {
       setShowCaptcha(true)
     } else {
       setEmail('')
-      setApiKey('')  // <--- CLEAR API KEY WHEN RESETTING
+      setApiKey('')
       setStarted(false)
       setShowCaptcha(false)
       seenUids.current.clear()
@@ -72,7 +72,7 @@ export default function Home({ siteTitle }) {
       const res = await fetch('/api/emails', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, apiKey }), // <--- SEND BOTH
+        body: JSON.stringify({ email, apiKey }),
       })
       const { emails } = await res.json()
       const newOnes = emails?.filter(m => {

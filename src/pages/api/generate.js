@@ -12,7 +12,6 @@ export default withSessionRoute(async function handler(req, res) {
   const { cf_turnstile_token } = req.body
   const secret = process.env.TURNSTILE_SECRET
 
-  // Get domain from database config, not env!
   const cfg = getConfig()
   const domain = cfg.domain
 
@@ -53,7 +52,6 @@ export default withSessionRoute(async function handler(req, res) {
   const alias = randomWords({ exactly: 2, join: '.' })
   const email = `${alias}@${domain}`
 
-  // Generate a temp API key and store in session
   const apiKey = nanoid(32)
   req.session.set('email_api_key', { email, apiKey })
   await req.session.save()

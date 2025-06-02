@@ -2,7 +2,6 @@ import { getAdminPath, setAdminPath } from '../../../lib/db'
 import { withSessionRoute } from '../../../lib/session'
 
 export default withSessionRoute(async (req, res) => {
-  // Only allow the current admin path!
   const { adminPath } = req.query
   if (adminPath !== getAdminPath()) {
     return res.status(404).json({ error: 'Not found' })
