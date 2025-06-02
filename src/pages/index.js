@@ -118,6 +118,7 @@ export default function Home({ siteTitle }) {
           <div className="text-xl font-bold">{siteTitle}</div>
           <div className="space-x-6 text-gray-600">
             <Link href="/" className="hover:text-gray-900">Home</Link>
+            <Link href="https://github.com/isawebapp/mailsy" className="hover:text-gray-900">Project Github</Link>
           </div>
         </div>
       </nav>
@@ -234,6 +235,36 @@ export default function Home({ siteTitle }) {
           </div>
         </div>
       </div>
+      <footer className="bg-gray-50 py-4 text-center text-xs text-gray-500 border-t">
+        From <i>Is A Web App</i> (
+        <a
+          href="https://isawebapp.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-gray-700"
+        >
+          isawebapp.com
+        </a>{' '}
+        |{' '}
+        <a
+          href="https://github.com/isawebapp"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-gray-700"
+        >
+          GitHub
+        </a>
+        ) | Powered by{' '}
+        <a
+          href="https://tony-liu.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-gray-700"
+        >
+          tony-liu.com
+        </a>
+      </footer>
+
     </>
   )
 }
