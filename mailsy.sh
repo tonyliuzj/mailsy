@@ -54,8 +54,14 @@ install_mailsy() {
   fi
 
   # 3. PM2
-  echo "📦 Installing PM2..."
-  npm install -g pm2
+  echo "🔍 Checking for PM2..."
+  if command -v pm2 >/dev/null 2>&1; then
+    echo "✅ PM2 is already installed. Skipping installation."
+  else
+    echo "📦 Installing PM2..."
+    npm install -g pm2
+  fi
+
 
   # 4. Clone repo
   if [ -d "$INSTALL_DIR" ]; then
