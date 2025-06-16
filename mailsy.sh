@@ -82,7 +82,6 @@ install_mailsy() {
   echo "🔧 Configuring environment variables..."
   read -p "🔑 Cloudflare Turnstile site key: " SITE_KEY
   read -p "🔑 Cloudflare Turnstile secret key: " SECRET_KEY
-  read -p "🌐 Allowed domains (comma-separated, e.g. localhost:3000,example.com): " DOMAINS
   read -s -p "🔐 Session password (min 32 characters): " SESSION_PASS
   echo ""
   while [ ${#SESSION_PASS} -lt 32 ]; do
