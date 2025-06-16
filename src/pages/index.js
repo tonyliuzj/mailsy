@@ -52,6 +52,7 @@ export default function Home({ siteTitle }) {
   }
 
   const onGenerateClick = () => {
+    console.log("Start button pressed. started=", started);
     if (!started) {
       setShowCaptcha(true)
     } else {
