@@ -83,9 +83,6 @@ install_mailsy() {
   read -p "🔑 Cloudflare Turnstile site key: " SITE_KEY
   read -p "🔑 Cloudflare Turnstile secret key: " SECRET_KEY
   read -p "🌐 Allowed domains (comma-separated, e.g. localhost:3000,example.com): " DOMAINS
-  read -p "👤 Admin username: " ADMIN_USER
-  read -s -p "🔒 Admin password: " ADMIN_PASS
-  echo ""
   read -s -p "🔐 Session password (min 32 characters): " SESSION_PASS
   echo ""
   while [ ${#SESSION_PASS} -lt 32 ]; do
@@ -100,12 +97,8 @@ install_mailsy() {
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=$SITE_KEY
 TURNSTILE_SECRET_KEY=$SECRET_KEY
 
-ADMIN_USERNAME=$ADMIN_USER
-ADMIN_PASSWORD=$ADMIN_PASS
-
 SESSION_PASSWORD=$SESSION_PASS
 
-DOMAINS=$DOMAINS
 PORT=$APP_PORT
 EOF
 
