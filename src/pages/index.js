@@ -1,6 +1,24 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 
+export async function getServerSideProps() {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/info`)
+    const data = await res.json()
+    return {
+      props: {
+        siteTitle: data.title || 'Mailsy'
+      }
+    }
+  } catch (error) {
+    return {
+      props: {
+        siteTitle: 'Mailsy'
+      }
+    }
+  }
+}
+
 export default function Home({ siteTitle }) {
   const [email, setEmail] = useState('')
   const [apiKey, setApiKey] = useState('')
@@ -9,6 +27,8 @@ export default function Home({ siteTitle }) {
   const [countdown, setCountdown] = useState(5)
   const [showCaptcha, setShowCaptcha] = useState(false)
   const [started, setStarted] = useState(false)
+  const [domains, setDomains] = useState([])
+  const [selectedDomain, setSelectedDomain] = useState('')
   const seenUids = useRef(new Set())
   const widgetIdRef = useRef(null)
 
@@ -32,7 +52,26 @@ export default function Home({ siteTitle }) {
     }
   }, [siteKey, showCaptcha])
 
+  useEffect(() => {
+    fetch('/api/domains')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setDomains(data)
+          if (data.length > 0) {
+            setSelectedDomain(data[0].id)
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching domains:', error)
+        setDomains([])
+      })
+  }, [])
+
   const handleCaptcha = async token => {
+    if (!selectedDomain) return
+    
     setShowCaptcha(false)
     setStarted(true)
     seenUids.current.clear()
@@ -42,7 +81,10 @@ export default function Home({ siteTitle }) {
     const res = await fetch('/api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cf_turnstile_token: token }),
+      body: JSON.stringify({ 
+        cf_turnstile_token: token,
+        domain_id: selectedDomain
+      }),
     })
     const { email: alias, apiKey: key } = await res.json()
     if (alias && key) {
@@ -116,7 +158,7 @@ export default function Home({ siteTitle }) {
     <>
       <nav className="bg-white shadow">
         <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="text-xl font-bold">{siteTitle}</div>
+          <div className="text-xl font-bold">{siteTitle || 'Mailsy'}</div>
           <div className="space-x-6 text-gray-600">
             <Link href="/" className="hover:text-gray-900">Home</Link>
             <Link href="https://github.com/isawebapp/mailsy" className="hover:text-gray-900">Project Github</Link>
@@ -139,10 +181,29 @@ export default function Home({ siteTitle }) {
               </li>
             </ul>
 
+            {domains.length > 0 ? (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Select Domain</label>
+                <select
+                  value={selectedDomain}
+                  onChange={e => setSelectedDomain(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 p-2"
+                >
+                  {domains.map(domain => (
+                    <option key={domain.id} value={domain.id}>
+                      {domain.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <p className="text-red-500 text-sm mb-4">No active domains available. Please contact the administrator.</p>
+            )}
+
             <button
               onClick={onGenerateClick}
-              disabled={!siteKey}
-              className="w-full bg-black text-white py-2 rounded-md hover:opacity-90 transition mb-4"
+              disabled={!siteKey || !selectedDomain || domains.length === 0}
+              className="w-full bg-black text-white py-2 rounded-md hover:opacity-90 transition mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {!started ? 'Start' : 'Get New Address'}
             </button>

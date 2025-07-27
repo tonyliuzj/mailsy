@@ -1,7 +1,11 @@
 import Imap from 'node-imap'
 import { simpleParser } from 'mailparser'
-import { getConfig } from '../../lib/db'
+import Database from 'better-sqlite3'
+import path from 'path'
 import { withSessionRoute } from '../../lib/session'
+
+const dbPath = path.join(process.cwd(), 'data', 'temp-mail.db')
+const db = new Database(dbPath)
 
 export default withSessionRoute(async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -23,19 +27,17 @@ export default withSessionRoute(async function handler(req, res) {
     return res.status(401).json({ error: 'Unauthorized: Invalid or expired API key' })
   }
 
-  let cfg
-  try {
-    cfg = getConfig()
-  } catch {
-    return res.status(500).json({ error: 'Failed to load configuration.' })
+  const domain = db.prepare('SELECT * FROM domains WHERE id = ?').get(sessionData.domain_id)
+  if (!domain) {
+    return res.status(500).json({ error: 'Domain configuration not found' })
   }
 
   const imap = new Imap({
-    user:     cfg.imap_user,
-    password: cfg.imap_password,
-    host:     cfg.imap_host,
-    port:     cfg.imap_port,
-    tls:      cfg.imap_tls,
+    user:     domain.imap_user,
+    password: domain.imap_password,
+    host:     domain.imap_host,
+    port:     domain.imap_port,
+    tls:      domain.imap_tls,
   })
 
   await new Promise(resolve => {

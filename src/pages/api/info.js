@@ -1,9 +1,10 @@
-import { getConfig } from '../../lib/db'
+import { getSiteTitle, getFirstActiveDomain } from '../../lib/db'
 
 export default function handler(req, res) {
-  const cfg = getConfig()
+  const domain = getFirstActiveDomain()
+  const siteTitle = getSiteTitle()
   res.json({
-    domain: cfg.domain,
-    title: cfg.title
+    domain: domain.name,
+    title: domain.title || siteTitle
   })
 }

@@ -16,49 +16,32 @@ db.prepare(`
 `).run()
 
 db.prepare(`
-  CREATE TABLE IF NOT EXISTS config (
+  CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT
+  )
+`).run()
+
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS domains (
     id INTEGER PRIMARY KEY,
+    name TEXT UNIQUE,
     imap_host TEXT,
     imap_port INTEGER,
     imap_user TEXT,
     imap_password TEXT,
     imap_tls INTEGER,
-    admin_path TEXT DEFAULT 'admin',
-    domain TEXT,
-    title TEXT
+    is_active INTEGER DEFAULT 1
   )
 `).run()
 
-try { db.prepare('ALTER TABLE config ADD COLUMN domain TEXT').run() } catch {}
-try { db.prepare('ALTER TABLE config ADD COLUMN title TEXT').run() } catch {}
+db.prepare(`
+  INSERT OR IGNORE INTO settings (key, value)
+  VALUES ('admin_path', 'admin'),
+         ('site_title', 'example.com')
+`).run()
 
-let cfg = db.prepare('SELECT * FROM config WHERE id = 1').get()
-if (!cfg) {
-  db.prepare(`
-    INSERT INTO config (
-      id,
-      imap_host,
-      imap_port,
-      imap_user,
-      imap_password,
-      imap_tls,
-      admin_path,
-      domain,
-      title
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(
-    1,
-    '',
-    993,
-    '',
-    '',
-    1,
-    'admin',
-    'example.com',
-    'example.com'
-  )
-  cfg = db.prepare('SELECT * FROM config WHERE id = 1').get()
-}
+
 
 const defaultAdminUsername = process.env.ADMIN_USERNAME || 'admin'
 const defaultAdminPassword = process.env.ADMIN_PASSWORD || 'changeme'
@@ -86,69 +69,24 @@ export function updateAdminPassword(username, newPass) {
     .run(hash, username)
 }
 
-export function getConfig() {
-  let cfg = db.prepare('SELECT * FROM config WHERE id = 1').get()
-  if (!cfg) {
-    db.prepare(`
-      INSERT INTO config (
-        id,
-        imap_host,
-        imap_port,
-        imap_user,
-        imap_password,
-        imap_tls,
-        admin_path,
-        domain,
-        title
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      1, '', 993, '', '', 1, 'admin', 'example.com', 'example.com'
-    )
-    cfg = db.prepare('SELECT * FROM config WHERE id = 1').get()
-  }
-  if (!cfg.domain) cfg.domain = 'example.com'
-  if (!cfg.title) cfg.title = 'example.com'
-  cfg.imap_tls = Boolean(cfg.imap_tls)
-  return cfg
+export function getSetting(key) {
+  const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key)
+  return row ? row.value : null
 }
 
-export function updateConfig({
-  imap_host,
-  imap_port,
-  imap_user,
-  imap_password,
-  imap_tls,
-  domain,
-  title
-}) {
-  return db.prepare(`
-    UPDATE config SET
-      imap_host    = ?,
-      imap_port    = ?,
-      imap_user    = ?,
-      imap_password= ?,
-      imap_tls     = ?,
-      domain       = ?,
-      title        = ?
-    WHERE id = 1
-  `).run(
-    imap_host,
-    imap_port,
-    imap_user,
-    imap_password,
-    imap_tls ? 1 : 0,
-    domain,
-    title
-  )
+export function setSetting(key, value) {
+  db.prepare(`
+    INSERT OR REPLACE INTO settings (key, value)
+    VALUES (?, ?)
+  `).run(key, value)
 }
 
 export function getAdminPath() {
-  const row = db.prepare('SELECT admin_path FROM config WHERE id = 1').get()
-  return row?.admin_path || 'admin'
+  return getSetting('admin_path') || 'admin'
 }
 
 export function setAdminPath(newPath) {
-  db.prepare('UPDATE config SET admin_path = ? WHERE id = 1').run(newPath)
+  setSetting('admin_path', newPath)
 }
 
 export function updateAdminUsername(oldUsername, newUsername) {
@@ -156,3 +94,23 @@ export function updateAdminUsername(oldUsername, newUsername) {
     .prepare('UPDATE admin SET username = ? WHERE username = ?')
     .run(newUsername, oldUsername)
 }
+
+export function getFirstActiveDomain() {
+  return db.prepare(`
+    SELECT name 
+    FROM domains 
+    WHERE is_active = 1 
+    ORDER BY id 
+    LIMIT 1
+  `).get() || { name: 'example.com' }
+}
+
+export function getSiteTitle() {
+  return getSetting('site_title') || 'example.com'
+}
+
+export function setSiteTitle(title) {
+  setSetting('site_title', title)
+}
+
+export { db }
