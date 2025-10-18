@@ -1,332 +1,387 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
-import Link from 'next/link'
+import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/router';
+import { Card, CardContent, CardHeader } from '../components/modern-ui/Card';
+import { Button } from '../components/modern-ui/Button';
+import { Badge } from '../components/modern-ui/Badge';
+import { LoadingSpinner } from '../components/modern-ui/LoadingSpinner';
+import { Layout } from '../components/modern-ui/Layout';
+import { EmailInput } from '../components/modern-ui/EmailInput';
+import { Input } from '../components/modern-ui/Input';
+import { withUser } from '../lib/user-auth';
 
-export async function getServerSideProps() {
+export const getServerSideProps = withUser(async ({ user }) => {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/info`)
-    const data = await res.json()
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/info`);
+    const data = await res.json();
     return {
       props: {
-        siteTitle: data.title || 'Mailsy'
-      }
-    }
+        siteTitle: data.title || 'Mailsy',
+        user: user || null,
+      },
+    };
   } catch (error) {
     return {
       props: {
-        siteTitle: 'Mailsy'
-      }
-    }
+        siteTitle: 'Mailsy',
+        user: user || null,
+      },
+    };
   }
-}
+});
 
-export default function Home({ siteTitle }) {
-  const [email, setEmail] = useState('')
-  const [apiKey, setApiKey] = useState('')
-  const [inbox, setInbox] = useState([])
-  const [selectedEmail, setSelectedEmail] = useState(null)
-  const [countdown, setCountdown] = useState(5)
-  const [showCaptcha, setShowCaptcha] = useState(false)
-  const [started, setStarted] = useState(false)
-  const [domains, setDomains] = useState([])
-  const [selectedDomain, setSelectedDomain] = useState('')
-  const seenUids = useRef(new Set())
-  const widgetIdRef = useRef(null)
+export default function Home({ siteTitle, user }) {
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [apiKey, setApiKey] = useState('');
+  const [showCaptcha, setShowCaptcha] = useState(false);
+  const [started, setStarted] = useState(false);
+  const [domains, setDomains] = useState([]);
+  const [selectedDomain, setSelectedDomain] = useState('');
+  const [emailInput, setEmailInput] = useState('');
+  const [password, setPassword] = useState('');
+  const [generatedPassword, setGeneratedPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [createdAccount, setCreatedAccount] = useState(null);
+  const widgetIdRef = useRef(null);
+  const [isLoginView, setIsLoginView] = useState(false);
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPasskey, setLoginPasskey] = useState('');
 
-  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY;
 
   useEffect(() => {
-    if (!siteKey || !showCaptcha) return
-    const script = document.createElement('script')
-    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
-    script.async = true
-    document.body.appendChild(script)
+    if (user) return;
+    if (!siteKey || !showCaptcha) return;
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+    script.async = true;
+    document.body.appendChild(script);
     script.onload = () => {
       widgetIdRef.current = window.turnstile.render('#cf-turnstile', {
         sitekey: siteKey,
         callback: handleCaptcha,
-      })
-    }
+      });
+    };
     return () => {
-      document.body.removeChild(script)
-      widgetIdRef.current = null
-    }
-  }, [siteKey, showCaptcha])
+      document.body.removeChild(script);
+      widgetIdRef.current = null;
+    };
+  }, [siteKey, showCaptcha, user]);
 
   useEffect(() => {
+    if (user) return;
     fetch('/api/domains')
       .then(r => r.json())
       .then(data => {
         if (Array.isArray(data)) {
-          setDomains(data)
+          setDomains(data);
           if (data.length > 0) {
-            setSelectedDomain(data[0].id)
+            setSelectedDomain(data[0].name);
           }
         }
       })
       .catch(error => {
-        console.error('Error fetching domains:', error)
-        setDomains([])
-      })
-  }, [])
+        console.error('Error fetching domains:', error);
+        setDomains([]);
+      });
+  }, [user]);
+
+  
+  const generateRandomPrefix = () => {
+    const adjectives = ['quick', 'swift', 'fast', 'rapid', 'instant', 'speedy', 'hasty', 'nimble'];
+    const nouns = ['mail', 'email', 'message', 'letter', 'note', 'memo', 'dispatch', 'courier'];
+    const randomAdj = adjectives[Math.floor(Math.random() * adjectives.length)];
+    const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
+    const randomNumber = Math.floor(Math.random() * 1000);
+    return `${randomAdj}${randomNoun}${randomNumber}`;
+  };
+
+  const handleRandomClick = () => {
+    const randomPrefix = generateRandomPrefix();
+    setEmailInput(randomPrefix);
+  };
 
   const handleCaptcha = async token => {
-    if (!selectedDomain) return
+    if (!selectedDomain || !emailInput) return;
     
-    setShowCaptcha(false)
-    setStarted(true)
-    seenUids.current.clear()
-    setInbox([])
-    setSelectedEmail(null)
-    setCountdown(5)
+    setShowCaptcha(false);
+    setStarted(true);
+    
+    const domain = domains.find(d => d.name === selectedDomain);
+    const fullEmail = `${emailInput}@${domain.name}`;
+    
     const res = await fetch('/api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
         cf_turnstile_token: token,
-        domain_id: selectedDomain
+        domainName: selectedDomain,
+        email_prefix: emailInput
       }),
-    })
-    const { email: alias, apiKey: key } = await res.json()
+    });
+    const { email: alias, apiKey: key } = await res.json();
     if (alias && key) {
-      setEmail(alias)
-      setApiKey(key)
+      setEmail(alias);
+      setApiKey(key);
     }
-  }
+  };
 
-  const onGenerateClick = () => {
-    console.log("Start button pressed. started=", started);
-    if (!started) {
-      setShowCaptcha(true)
-    } else {
-      setEmail('')
-      setApiKey('')
-      setStarted(false)
-      setShowCaptcha(false)
-      seenUids.current.clear()
-      setInbox([])
-      setSelectedEmail(null)
-      setCountdown(5)
+
+  const handleSubmit = async () => {
+    if (!emailInput || !selectedDomain) {
+      setError('Please enter an email address');
+      return;
     }
-  }
 
-  const fetchEmails = useCallback(async () => {
-    if (!email || !apiKey) return
+    
+    setIsLoading(true);
+    setError('');
+
     try {
-      const res = await fetch('/api/emails', {
+      const res = await fetch('/api/users/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, apiKey }),
-      })
-      const { emails } = await res.json()
-      const newOnes = emails?.filter(m => {
-        if (seenUids.current.has(m.uid)) return false
-        seenUids.current.add(m.uid)
-        return true
-      }) || []
-      if (newOnes.length) setInbox(prev => [...newOnes, ...prev])
+        body: JSON.stringify({
+          userEmail: emailInput,
+          emailType: 'username',
+          domainName: selectedDomain
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        localStorage.setItem('email', data.email.email);
+        localStorage.setItem('apiKey', data.email.apiKey);
+        localStorage.setItem('passkey', data.passkey);
+        setCreatedAccount({
+          email: data.email.email,
+          passkey: data.passkey
+        });
+        setEmail(data.email.email);
+        setApiKey(data.email.apiKey);
+        setStarted(true);
+        
+        
+        setEmailInput('');
+        setPassword('');
+        router.push('/inbox');
+      } else {
+        setError(data.error || 'Failed to create account');
+      }
     } catch (err) {
-      console.error(err)
+      console.error('Account creation error:', err);
+      setError('Failed to create account. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
-  }, [email, apiKey])
+  };
 
-  useEffect(() => {
-    let timer
-    if (started && email && apiKey) {
-      fetchEmails()
-      setCountdown(5)
-      timer = setInterval(() => {
-        setCountdown(c => {
-          if (c <= 1) {
-            fetchEmails()
-            return 5
-          }
-          return c - 1
-        })
-      }, 1000)
+  const handleLogin = async () => {
+    if (!loginEmail || !loginPasskey) {
+      setError('Please enter both email and passkey.');
+      return;
     }
-    return () => clearInterval(timer)
-  }, [started, email, apiKey, fetchEmails])
+    setIsLoading(true);
+    setError('');
+    try {
+      const res = await fetch('/api/users/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: loginEmail, passkey: loginPasskey }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        router.push('/inbox');
+      } else {
+        setError(data.error || 'Login failed.');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('An error occurred during login.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const getSnippet = text => {
-    const first = (text || '').split('\n')[0]
-    return first.length > 50 ? first.slice(0, 50) + '…' : first
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/users/logout', { method: 'POST' });
+      router.reload();
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
+  if (user) {
+    return (
+      <Layout siteTitle={siteTitle}>
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="w-full max-w-md">
+            <Card className="h-fit">
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    Welcome Back!
+                  </h2>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    You are already logged in.
+                  </p>
+                </div>
+                <div className="space-y-4">
+                  <Button
+                    onClick={() => router.push('/inbox')}
+                    className="w-full"
+                    size="lg"
+                  >
+                    Go to My Inbox
+                  </Button>
+                  <Button
+                    onClick={handleLogout}
+                    className="w-full"
+                    size="lg"
+                    variant="secondary"
+                  >
+                    Logout
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </Layout>
+    );
   }
 
-  const copyEmail = () => email && navigator.clipboard.writeText(email)
-
   return (
-    <>
-      <nav className="bg-white shadow">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="text-xl font-bold">{siteTitle || 'Mailsy'}</div>
-          <div className="space-x-6 text-gray-600">
-            <Link href="/" className="hover:text-gray-900">Home</Link>
-            <Link href="https://github.com/isawebapp/mailsy" className="hover:text-gray-900">Project Github</Link>
-          </div>
-        </div>
-      </nav>
-
-      <div className="min-h-screen bg-gray-50 py-12 px-6 sm:px-8 md:px-12 lg:px-16">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-          <div className="md:col-span-1 bg-white p-6 rounded-lg shadow flex flex-col">
-            <h1 className="text-2xl md:text-3xl font-bold mb-4 text-center">
-              Temp Mail Generator
-            </h1>
-            <ul className="space-y-2 text-gray-700 mb-6 text-sm md:text-base">
-              <li className="flex items-center">
-                <span className="mr-2">😊</span> Privacy friendly
-              </li>
-              <li className="flex items-center">
-                <span className="mr-2">⏱️</span> One-time use
-              </li>
-            </ul>
-
-            {domains.length > 0 ? (
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Select Domain</label>
-                <select
-                  value={selectedDomain}
-                  onChange={e => setSelectedDomain(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 p-2"
-                >
-                  {domains.map(domain => (
-                    <option key={domain.id} value={domain.id}>
-                      {domain.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ) : (
-              <p className="text-red-500 text-sm mb-4">No active domains available. Please contact the administrator.</p>
-            )}
-
-            <button
-              onClick={onGenerateClick}
-              disabled={!siteKey || !selectedDomain || domains.length === 0}
-              className="w-full bg-black text-white py-2 rounded-md hover:opacity-90 transition mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {!started ? 'Start' : 'Get New Address'}
-            </button>
-
-            {showCaptcha && !email && (
-              <div className="flex justify-center">
-                <div id="cf-turnstile"></div>
-              </div>
-            )}
-
-            {started && email && (
-              <div className="mt-4 text-center">
-                <p
-                  onClick={copyEmail}
-                  className="font-mono bg-gray-100 p-2 rounded cursor-pointer hover:bg-gray-200 break-all text-sm md:text-base"
-                >
-                  {email}
-                </p>
-                <p className="text-gray-500 text-xs md:text-sm mt-1">
-                  Refresh in: {countdown} second{countdown !== 1 ? 's' : ''}
-                </p>
-              </div>
-            )}
-          </div>
-
-          <div className="md:col-span-2 bg-white p-6 rounded-lg shadow flex flex-col">
-            {!started ? (
-              <p className="text-gray-500 text-center mt-4">
-                Click “Start” to generate an address.
-              </p>
-            ) : selectedEmail ? (
-              <div className="flex flex-col flex-1">
+    <Layout siteTitle={siteTitle}>
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="w-full max-w-md">
+          <Card className="h-fit">
+            <CardHeader className="pb-4">
+              <div className="flex border-b">
                 <button
-                  onClick={() => setSelectedEmail(null)}
-                  className="self-start text-blue-600 hover:underline mb-4 text-sm"
+                  onClick={() => setIsLoginView(false)}
+                  className={`flex-1 py-2 text-center font-medium ${!isLoginView ? 'border-b-2 border-black text-black' : 'text-gray-500'}`}
                 >
-                  ← Back
+                  Create Account
                 </button>
-                <h2 className="text-lg font-semibold mb-2">
-                  {selectedEmail.subject || '(no subject)'}
-                </h2>
-                <p className="text-xs text-gray-600 mb-4">
-                  From: {selectedEmail.from} —{' '}
-                  {new Date(selectedEmail.date).toLocaleString()}
-                </p>
-                <div className="flex-1 overflow-y-auto border-t pt-2">
-                  {selectedEmail.html ? (
-                    <div
-                      className="space-y-4 text-sm text-gray-800 break-words"
-                      dangerouslySetInnerHTML={{ __html: selectedEmail.html }}
+                <button
+                  onClick={() => setIsLoginView(true)}
+                  className={`flex-1 py-2 text-center font-medium ${isLoginView ? 'border-b-2 border-black text-black' : 'text-gray-500'}`}
+                >
+                  Login
+                </button>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="space-y-6">
+              {isLoginView ? (
+                <>
+                  <div className="text-center">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                      Login to Your Account
+                    </h2>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Enter your credentials to access your account.
+                    </p>
+                  </div>
+                  <div className="space-y-4">
+                    <Input
+                      label="Email Address"
+                      type="email"
+                      value={loginEmail}
+                      onChange={setLoginEmail}
+                      placeholder="you@example.com"
+                      disabled={isLoading}
                     />
-                  ) : (
-                    <pre className="whitespace-pre-wrap break-words text-sm text-gray-800 space-y-2">
-                      {selectedEmail.text}
-                    </pre>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="flex-1 overflow-y-auto">
-                <div className="flex items-center mb-4 text-sm text-gray-600">
-                  <div className="animate-spin border-[2px] border-gray-300 border-t-black rounded-full w-4 h-4 mr-2"></div>
-                  <span>Waiting for emails</span>
-                </div>
-                {inbox.length === 0 ? (
-                  <p className="text-gray-500 text-center">No messages yet.</p>
-                ) : (
-                  <ul className="divide-y">
-                    {inbox.map(m => (
-                      <li
-                        key={m.uid}
-                        onClick={() => setSelectedEmail(m)}
-                        className="grid grid-cols-[1fr_3fr_1fr] items-start gap-4 p-3 hover:bg-gray-50 cursor-pointer text-sm"
-                      >
-                        <div className="truncate font-medium">{m.from}</div>
-                        <div>
-                          <p className="truncate font-semibold">{m.subject || '(no subject)'}</p>
-                          <p className="text-gray-600">{getSnippet(m.text)}</p>
+                    <Input
+                      label="Passkey"
+                      type="password"
+                      value={loginPasskey}
+                      onChange={setLoginPasskey}
+                      placeholder="Your passkey"
+                      disabled={isLoading}
+                    />
+                    {error && (
+                      <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                        <p className="text-sm text-red-800">{error}</p>
+                      </div>
+                    )}
+                    <Button
+                      onClick={handleLogin}
+                      disabled={!loginEmail || !loginPasskey || isLoading}
+                      className="w-full"
+                      size="lg"
+                    >
+                      {isLoading ? (
+                        <div className="flex items-center justify-center">
+                          <LoadingSpinner size="sm" className="mr-2" />
+                          Logging in...
                         </div>
-                        <div className="text-right text-xs text-gray-500 whitespace-nowrap">
-                          {new Date(m.date).toLocaleDateString(undefined, {
-                            month: 'short', day: 'numeric'
-                          })}
+                      ) : (
+                        'Login'
+                      )}
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="text-center">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                      Create Email Address
+                    </h2>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Create your persistent email address with login credentials
+                    </p>
+                  </div>
+                  <div className="space-y-4">
+                    <EmailInput
+                      label="Email Address"
+                      value={emailInput}
+                      onChange={setEmailInput}
+                      domains={domains}
+                      selectedDomain={selectedDomain}
+                      onDomainChange={setSelectedDomain}
+                      placeholder="your-email"
+                      disabled={isLoading || started}
+                      onRandom={handleRandomClick}
+                    />
+                    {error && (
+                      <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                        <p className="text-sm text-red-800">{error}</p>
+                      </div>
+                    )}
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={
+                        (!emailInput || !selectedDomain || domains.length === 0) ||
+                        isLoading
+                      }
+                      className="w-full"
+                      size="lg"
+                    >
+                      {isLoading ? (
+                        <div className="flex items-center justify-center">
+                          <LoadingSpinner size="sm" className="mr-2" />
+                          Creating...
                         </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            )}
-          </div>
+                      ) : (
+                        'Create Account'
+                      )}
+                    </Button>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
-      <footer className="bg-gray-50 py-4 text-center text-xs text-gray-500 border-t">
-        From <i>Is A Web App</i> (
-        <a
-          href="https://isawebapp.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline hover:text-gray-700"
-        >
-          isawebapp.com
-        </a>{' '}
-        |{' '}
-        <a
-          href="https://github.com/isawebapp"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline hover:text-gray-700"
-        >
-          GitHub
-        </a>
-        ) | Powered by{' '}
-        <a
-          href="https://tony-liu.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline hover:text-gray-700"
-        >
-          tony-liu.com
-        </a>
-      </footer>
-
-    </>
-  )
+    </Layout>
+  );
 }

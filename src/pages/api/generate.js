@@ -13,7 +13,7 @@ export default withSessionRoute(async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const { cf_turnstile_token, domain_id } = req.body
+  const { cf_turnstile_token, domain_id, email_prefix } = req.body
   const secret = process.env.TURNSTILE_SECRET
 
   if (!secret) {
@@ -28,7 +28,7 @@ export default withSessionRoute(async function handler(req, res) {
   let verification
   try {
     const resp = await fetch(
-      'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+      'https:
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -56,7 +56,7 @@ export default withSessionRoute(async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid domain' })
   }
 
-  const alias = randomWords({ exactly: 2, join: '.' })
+  const alias = email_prefix || randomWords({ exactly: 2, join: '.' })
   const email = `${alias}@${domain.name}`
 
   const apiKey = nanoid(32)

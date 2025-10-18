@@ -43,12 +43,12 @@ A simple, modern disposable email web app built with Next.js, Tailwind CSS, and 
 ## Run by script (One Click Install)
 
 ```bash
-curl -sSL https://github.com/isawebapp/Mailsy/releases/latest/download/mailsy.sh -o mailsy.sh && chmod +x mailsy.sh && bash mailsy.sh
+curl -sSL https://github.com/tonyliuzj/Mailsy/releases/latest/download/mailsy.sh -o mailsy.sh && chmod +x mailsy.sh && bash mailsy.sh
 ```
 
 1. **Clone** the repo  
 ```bash
-git clone https://github.com/isawebapp/Mailsy.git
+git clone https://github.com/tonyliuzj/Mailsy.git
 cd mailsy
 ```
 

@@ -2,7 +2,7 @@
 
 set -e
 
-GIT_REPO="https://github.com/isawebapp/mailsy.git"
+GIT_REPO="https://github.com/tonyliuzj/mailsy.git"
 INSTALL_DIR="$HOME/mailsy"
 
 show_menu() {
