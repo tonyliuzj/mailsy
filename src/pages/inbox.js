@@ -50,7 +50,70 @@ export default function Inbox({ siteTitle, user }) {
         const response = await fetch('/api/account/info')
         if (response.ok) {
           const data = await response.json()
-          setUserEmails(data.emails || [])
+          const emails = data.emails || []
+          
+          // Check for newly created account passkey in localStorage
+          const storedPasskey = localStorage.getItem('passkey')
+          if (storedPasskey && emails.length > 0) {
+            // This is a newly created account, show the passkey unmasked
+            const primaryEmail = emails[0]
+            
+            // Update the first email with the actual passkey
+            const updatedEmails = emails.map((email, index) => 
+              index === 0 ? { ...email, passkey: storedPasskey } : email
+            )
+            
+            setUserEmails(updatedEmails)
+            
+            // Mark this passkey as newly generated to apply unmasking logic
+            setNewlyGeneratedPasskeys(prev => new Set([...prev, primaryEmail.id]))
+            setSuccess('Welcome! Your passkey is shown below. Copy it now - it will be masked in 30 seconds.')
+            
+            // Start countdown timer (30 seconds)
+            let timeLeft = 30
+            setPasskeyTimers(prev => ({
+              ...prev,
+              [primaryEmail.id]: timeLeft
+            }))
+
+            const timer = setInterval(() => {
+              timeLeft -= 1
+              setPasskeyTimers(prev => ({
+                ...prev,
+                [primaryEmail.id]: timeLeft
+              }))
+
+              if (timeLeft <= 0) {
+                clearInterval(timer)
+                // Auto-mask the passkey
+                setUserEmails(prevEmails =>
+                  prevEmails.map(email =>
+                    email.id === primaryEmail.id
+                      ? { ...email, passkey: null }
+                      : email
+                  )
+                )
+                // Remove from newly generated set
+                setNewlyGeneratedPasskeys(prev => {
+                  const newSet = new Set(prev)
+                  newSet.delete(primaryEmail.id)
+                  return newSet
+                })
+                // Remove timer
+                setPasskeyTimers(prev => {
+                  const newTimers = { ...prev }
+                  delete newTimers[primaryEmail.id]
+                  return newTimers
+                })
+                setSuccess('')
+              }
+            }, 1000)
+            
+            // Clear the localStorage to prevent showing on subsequent visits
+            localStorage.removeItem('passkey')
+          } else {
+            setUserEmails(emails)
+          }
         } else {
           
           router.push('/')
@@ -285,6 +348,16 @@ export default function Inbox({ siteTitle, user }) {
               <h3 className="text-lg font-semibold">Account Details</h3>
             </CardHeader>
             <CardContent>
+              {success && (
+                <div className="bg-green-50 border border-green-200 rounded-md p-3 mb-4">
+                  <p className="text-sm text-green-800">{success}</p>
+                </div>
+              )}
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
+                  <p className="text-sm text-red-800">{error}</p>
+                </div>
+              )}
               {userEmails.map(email => (
                 <div key={email.id} className="border-b last:border-b-0 py-4">
                   <div className="flex items-center justify-between">
