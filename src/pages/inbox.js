@@ -174,7 +174,7 @@ export default function Inbox({ siteTitle, user }) {
   };
 
   const handleMaskPasskey = (emailId) => {
-    // Manually mask the passkey for first-time users
+    // Manually mask the passkey for both first-time users and regenerated passkeys
     setUserEmails(prevEmails =>
       prevEmails.map(email =>
         email.id === emailId
@@ -185,6 +185,13 @@ export default function Inbox({ siteTitle, user }) {
     
     // Remove from first-time users set
     setFirstTimeUsers(prev => {
+      const newSet = new Set(prev)
+      newSet.delete(emailId)
+      return newSet
+    })
+    
+    // Remove from newly generated passkeys set
+    setNewlyGeneratedPasskeys(prev => {
       const newSet = new Set(prev)
       newSet.delete(emailId)
       return newSet
@@ -210,7 +217,7 @@ export default function Inbox({ siteTitle, user }) {
 
       if (response.ok) {
         const data = await response.json()
-        setSuccess('Passkey regenerated successfully! Copy it now - it will be masked in 30 seconds.')
+        setSuccess('Passkey regenerated successfully! You can mask it manually when ready.')
         
         // Update the email with the new passkey
         setUserEmails(prevEmails =>
@@ -221,52 +228,18 @@ export default function Inbox({ siteTitle, user }) {
           )
         )
 
-        // Mark this passkey as newly generated (not first-time user)
+        // Mark this passkey as newly generated (permanent unmasking, no timer)
         setNewlyGeneratedPasskeys(prev => new Set([...prev, emailId]))
 
         // Clear any existing timer for this email
         if (passkeyTimers[emailId]) {
           clearInterval(passkeyTimers[emailId])
+          setPasskeyTimers(prev => {
+            const newTimers = { ...prev }
+            delete newTimers[emailId]
+            return newTimers
+          })
         }
-
-        // Start countdown timer (30 seconds)
-        let timeLeft = 30
-        setPasskeyTimers(prev => ({
-          ...prev,
-          [emailId]: timeLeft
-        }))
-
-        const timer = setInterval(() => {
-          timeLeft -= 1
-          setPasskeyTimers(prev => ({
-            ...prev,
-            [emailId]: timeLeft
-          }))
-
-          if (timeLeft <= 0) {
-            clearInterval(timer)
-            // Auto-mask the passkey
-            setUserEmails(prevEmails =>
-              prevEmails.map(email =>
-                email.id === emailId
-                  ? { ...email, passkey: null }
-                  : email
-              )
-            )
-            // Remove from newly generated set
-            setNewlyGeneratedPasskeys(prev => {
-              const newSet = new Set(prev)
-              newSet.delete(emailId)
-              return newSet
-            })
-            // Remove timer
-            setPasskeyTimers(prev => {
-              const newTimers = { ...prev }
-              delete newTimers[emailId]
-              return newTimers
-            })
-          }
-        }, 1000)
 
       } else {
         const data = await response.json()
@@ -357,11 +330,6 @@ export default function Inbox({ siteTitle, user }) {
                   <div className="mt-4">
                     <div className="flex items-center justify-between">
                       <label className="text-sm font-medium text-gray-700">Passkey:</label>
-                      {newlyGeneratedPasskeys.has(email.id) && passkeyTimers[email.id] && (
-                        <span className="text-xs text-orange-600 font-medium">
-                          Auto-mask in {passkeyTimers[email.id]}s
-                        </span>
-                      )}
                     </div>
                     <div className="flex items-center space-x-2 mt-1">
                       <code className={`flex-1 text-xs p-2 rounded transition-colors ${
@@ -390,11 +358,11 @@ export default function Inbox({ siteTitle, user }) {
                     )}
                     {newlyGeneratedPasskeys.has(email.id) && (
                       <p className="text-xs text-green-700 mt-1">
-                        🔑 New passkey generated! Make sure to copy it before it gets masked.
+                        🔑 New passkey generated! Click "Mask Passkey" when you're ready to hide it.
                       </p>
                     )}
                   </div>
-                  {firstTimeUsers.has(email.id) ? (
+                  {(firstTimeUsers.has(email.id) || newlyGeneratedPasskeys.has(email.id)) ? (
                     <Button
                       variant="secondary"
                       size="sm"
