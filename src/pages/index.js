@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { Card, CardContent, CardHeader } from '../components/modern-ui/Card';
 import { Button } from '../components/modern-ui/Button';
-import { Badge } from '../components/modern-ui/Badge';
 import { LoadingSpinner } from '../components/modern-ui/LoadingSpinner';
 import { Layout } from '../components/modern-ui/Layout';
 import { EmailInput } from '../components/modern-ui/EmailInput';
@@ -11,15 +10,16 @@ import { withUser } from '../lib/user-auth';
 
 export const getServerSideProps = withUser(async ({ user }) => {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/info`);
-    const data = await res.json();
+    const { getSiteTitle, getTurnstileConfig } = await import('../lib/db');
+    const siteTitle = getSiteTitle() || 'Mailsy';
+    const turnstile = getTurnstileConfig();
     return {
       props: {
-        siteTitle: data.title || 'Mailsy',
+        siteTitle,
         user: user || null,
-        turnstileSiteKey: data.turnstileSiteKey || '',
-        turnstileRegistrationEnabled: Boolean(data.turnstileRegistrationEnabled),
-        turnstileLoginEnabled: Boolean(data.turnstileLoginEnabled),
+        turnstileSiteKey: turnstile.siteKey || '',
+        turnstileRegistrationEnabled: Boolean(turnstile.registrationEnabled),
+        turnstileLoginEnabled: Boolean(turnstile.loginEnabled),
       },
     };
   } catch (error) {

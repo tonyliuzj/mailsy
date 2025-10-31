@@ -11,6 +11,9 @@ function parseBoolean(value) {
 
 export function isTurnstileEnabled(type) {
   const config = getTurnstileConfig()
+  if (!config.siteKey || !config.secretKey) {
+    return false
+  }
   if (type === 'registration') {
     return parseBoolean(config.registrationEnabled)
   }
