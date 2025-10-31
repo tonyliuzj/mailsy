@@ -2,6 +2,7 @@ import { createEmailOnlyUser, createUserEmail, getFirstActiveDomain } from '../.
 import { createSessionCookie } from '../../lib/user-session.js'
 import { generate as randomWords } from 'random-words'
 import { nanoid } from 'nanoid'
+import { isTurnstileEnabled, verifyTurnstileToken, getClientIp } from '../../lib/turnstile.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -10,42 +11,34 @@ export default async function handler(req, res) {
   }
 
   try {
-const { emailType, customEmail, domainName, cf_turnstile_token } = req.body
+const {
+      emailType,
+      customEmail,
+      domainName,
+      cf_turnstile_token,
+      turnstileToken: bodyTurnstileToken,
+    } = req.body
 
     
-if (!emailType || !domainName || !cf_turnstile_token) {
+    if (!emailType || !domainName) {
       return res.status(400).json({ error: 'Missing required fields' })
     }
 
     
-    const secret = process.env.TURNSTILE_SECRET
-    if (!secret) {
-      return res.status(500).json({ error: 'CAPTCHA not configured' })
-    }
+    const requiresTurnstile = isTurnstileEnabled('registration')
+    const turnstileToken = bodyTurnstileToken || cf_turnstile_token
 
-    let verification
-    try {
-      const resp = await fetch(
-        'https:
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({
-            secret,
-            response: cf_turnstile_token,
-            remoteip: req.socket.remoteAddress || ''
-          })
-        }
-      )
-      verification = await resp.json()
-    } catch (err) {
-      console.error('[create-email] CAPTCHA verification error', err)
-      return res.status(500).json({ error: 'Error verifying CAPTCHA' })
-    }
+    if (requiresTurnstile) {
+      if (!turnstileToken) {
+        return res.status(400).json({ error: 'Turnstile verification is required' })
+      }
 
-    if (!verification.success) {
-      console.error('[create-email] CAPTCHA verification failed:', verification)
-      return res.status(400).json({ error: 'CAPTCHA verification failed' })
+      const verification = await verifyTurnstileToken(turnstileToken, getClientIp(req))
+      if (!verification.success) {
+        const statusCode = verification.error && verification.error.includes('not configured') ? 500 : 400
+        console.error('[create-email] Turnstile verification failed:', verification)
+        return res.status(statusCode).json({ error: verification.error || 'Turnstile verification failed' })
+      }
     }
 
     

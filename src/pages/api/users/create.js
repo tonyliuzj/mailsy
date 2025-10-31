@@ -2,6 +2,7 @@ import { createEmail, getFirstActiveDomain, createSession } from '../../../lib/d
 import { withSessionRoute } from '../../../lib/session.js';
 import { generate as randomWords } from 'random-words';
 import { nanoid } from 'nanoid';
+import { isTurnstileEnabled, verifyTurnstileToken, getClientIp } from '../../../lib/turnstile.js';
 
 async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -10,7 +11,16 @@ async function handler(req, res) {
   }
 
   try {
-const { userEmail, emailType, customEmail, domainName } = req.body
+const { userEmail, emailType, customEmail, domainName, turnstileToken } = req.body
+
+    
+    if (isTurnstileEnabled('registration')) {
+      const verification = await verifyTurnstileToken(turnstileToken, getClientIp(req));
+      if (!verification.success) {
+        const statusCode = verification.error && verification.error.includes('not configured') ? 500 : 400;
+        return res.status(statusCode).json({ error: verification.error || 'Turnstile verification failed' });
+      }
+    }
 
     
 if (!userEmail || !emailType || !domainName) {

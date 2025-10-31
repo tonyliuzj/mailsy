@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/router'
 import { withSessionSsr } from '../../lib/session'
 
@@ -34,26 +34,43 @@ export default function AdminPage({ admin, adminPath }) {
   const [domainMsg, setDomainMsg] = useState('')
   const [siteTitle, setSiteTitle] = useState('')
   const [siteTitleMsg, setSiteTitleMsg] = useState('')
+  const [turnstileSettings, setTurnstileSettings] = useState({
+    siteKey: '',
+    secretKey: '',
+    registrationEnabled: false,
+    loginEnabled: false,
+  })
+  const [turnstileMsg, setTurnstileMsg] = useState('')
   const router = useRouter()
 
-  useEffect(() => {
-    fetchDomains()
-    fetchSiteTitle()
-  }, [adminPath])
-
-  const fetchSiteTitle = () => {
+  const fetchSettings = useCallback(() => {
     fetch(`/api/${adminPath}/settings`)
       .then(r => r.json())
-      .then(data => setSiteTitle(data.site_title))
+      .then(data => {
+        if (data?.site_title !== undefined) {
+          setSiteTitle(data.site_title || '')
+        }
+        setTurnstileSettings(prev => ({
+          siteKey: data?.turnstile_site_key ?? prev.siteKey ?? '',
+          secretKey: data?.turnstile_secret_key ?? prev.secretKey ?? '',
+          registrationEnabled: ['1', 1, true, 'true', 'yes', 'on'].includes(data?.turnstile_registration_enabled),
+          loginEnabled: ['1', 1, true, 'true', 'yes', 'on'].includes(data?.turnstile_login_enabled),
+        }))
+      })
       .catch(console.error)
-  }
+  }, [adminPath])
 
-  const fetchDomains = () => {
+  const fetchDomains = useCallback(() => {
     fetch(`/api/${adminPath}/domains`)
       .then(r => r.json())
       .then(setDomains)
       .catch(console.error)
-  }
+  }, [adminPath])
+
+  useEffect(() => {
+    fetchDomains()
+    fetchSettings()
+  }, [adminPath, fetchDomains, fetchSettings])
 
   const changePwd = async e => {
     e.preventDefault()
@@ -149,8 +166,30 @@ export default function AdminPage({ admin, adminPath }) {
     })
     if (res.ok) {
       setSiteTitleMsg('Site title updated successfully.')
+      fetchSettings()
     } else {
       setSiteTitleMsg('Error updating site title.')
+    }
+  }
+
+  const saveTurnstileSettings = async (e) => {
+    e.preventDefault()
+    setTurnstileMsg('')
+    const res = await fetch(`/api/${adminPath}/settings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        turnstile_site_key: turnstileSettings.siteKey,
+        turnstile_secret_key: turnstileSettings.secretKey,
+        turnstile_registration_enabled: turnstileSettings.registrationEnabled,
+        turnstile_login_enabled: turnstileSettings.loginEnabled,
+      }),
+    })
+    if (res.ok) {
+      setTurnstileMsg('Turnstile settings updated successfully.')
+      fetchSettings()
+    } else {
+      setTurnstileMsg('Error updating Turnstile settings.')
     }
   }
 
@@ -294,6 +333,66 @@ export default function AdminPage({ admin, adminPath }) {
               Save Site Title
             </button>
             {siteTitleMsg && <p className="text-green-600 mt-2">{siteTitleMsg}</p>}
+          </form>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-lg p-6 mt-6">
+          <form onSubmit={saveTurnstileSettings} className="space-y-4">
+            <h2 className="text-xl font-semibold border-b pb-2 mb-3">Cloudflare Turnstile</h2>
+            <p className="text-sm text-gray-500">
+              Provide the site and secret keys from your Cloudflare dashboard and choose where Turnstile should be enforced.
+            </p>
+
+            <label className="block">
+              <span className="block font-medium">Site Key</span>
+              <input
+                type="text"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+                value={turnstileSettings.siteKey}
+                onChange={e => setTurnstileSettings(prev => ({ ...prev, siteKey: e.target.value }))}
+                placeholder="0x0000000000000000000000000000000AA"
+              />
+            </label>
+
+            <label className="block">
+              <span className="block font-medium">Secret Key</span>
+              <input
+                type="password"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+                value={turnstileSettings.secretKey}
+                onChange={e => setTurnstileSettings(prev => ({ ...prev, secretKey: e.target.value }))}
+                placeholder="0x0000000000000000000000000000000AA"
+              />
+            </label>
+
+            <div className="flex flex-col space-y-2">
+              <label className="inline-flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={turnstileSettings.registrationEnabled}
+                  onChange={e => setTurnstileSettings(prev => ({ ...prev, registrationEnabled: e.target.checked }))}
+                  className="rounded"
+                />
+                <span>Require Turnstile when creating an account</span>
+              </label>
+              <label className="inline-flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={turnstileSettings.loginEnabled}
+                  onChange={e => setTurnstileSettings(prev => ({ ...prev, loginEnabled: e.target.checked }))}
+                  className="rounded"
+                />
+                <span>Require Turnstile at login</span>
+              </label>
+            </div>
+
+            <button
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md shadow"
+            >
+              Save Turnstile Settings
+            </button>
+            {turnstileMsg && <p className="text-green-600 mt-2">{turnstileMsg}</p>}
           </form>
         </div>
 

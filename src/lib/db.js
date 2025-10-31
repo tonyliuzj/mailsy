@@ -39,7 +39,11 @@ db.prepare(`
 db.prepare(`
   INSERT OR IGNORE INTO settings (key, value)
   VALUES ('admin_path', 'admin'),
-         ('site_title', 'example.com')
+         ('site_title', 'example.com'),
+         ('turnstile_site_key', ''),
+         ('turnstile_secret_key', ''),
+         ('turnstile_registration_enabled', '0'),
+         ('turnstile_login_enabled', '0')
 `).run()
 
 db.prepare(`
@@ -133,6 +137,37 @@ export function getSiteTitle() {
 
 export function setSiteTitle(title) {
   setSetting('site_title', title)
+}
+
+export function getTurnstileConfig() {
+  const rawRegistration = getSetting('turnstile_registration_enabled')
+  const rawLogin = getSetting('turnstile_login_enabled')
+  return {
+    siteKey: getSetting('turnstile_site_key') || '',
+    secretKey: getSetting('turnstile_secret_key') || '',
+    registrationEnabled: rawRegistration ? rawRegistration === '1' : false,
+    loginEnabled: rawLogin ? rawLogin === '1' : false,
+  }
+}
+
+export function setTurnstileConfig({
+  siteKey,
+  secretKey,
+  registrationEnabled,
+  loginEnabled,
+} = {}) {
+  if (typeof siteKey === 'string') {
+    setSetting('turnstile_site_key', siteKey.trim())
+  }
+  if (typeof secretKey === 'string') {
+    setSetting('turnstile_secret_key', secretKey.trim())
+  }
+  if (typeof registrationEnabled === 'boolean') {
+    setSetting('turnstile_registration_enabled', registrationEnabled ? '1' : '0')
+  }
+  if (typeof loginEnabled === 'boolean') {
+    setSetting('turnstile_login_enabled', loginEnabled ? '1' : '0')
+  }
 }
 
 export function createEmail(emailAddress, passkey, domainName) {

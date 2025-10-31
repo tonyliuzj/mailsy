@@ -17,6 +17,9 @@ export const getServerSideProps = withUser(async ({ user }) => {
       props: {
         siteTitle: data.title || 'Mailsy',
         user: user || null,
+        turnstileSiteKey: data.turnstileSiteKey || '',
+        turnstileRegistrationEnabled: Boolean(data.turnstileRegistrationEnabled),
+        turnstileLoginEnabled: Boolean(data.turnstileLoginEnabled),
       },
     };
   } catch (error) {
@@ -24,16 +27,24 @@ export const getServerSideProps = withUser(async ({ user }) => {
       props: {
         siteTitle: 'Mailsy',
         user: user || null,
+        turnstileSiteKey: '',
+        turnstileRegistrationEnabled: false,
+        turnstileLoginEnabled: false,
       },
     };
   }
 });
 
-export default function Home({ siteTitle, user }) {
+export default function Home({
+  siteTitle,
+  user,
+  turnstileSiteKey: initialTurnstileSiteKey,
+  turnstileRegistrationEnabled: initialTurnstileRegistrationEnabled,
+  turnstileLoginEnabled: initialTurnstileLoginEnabled,
+}) {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [apiKey, setApiKey] = useState('');
-  const [showCaptcha, setShowCaptcha] = useState(false);
   const [started, setStarted] = useState(false);
   const [domains, setDomains] = useState([]);
   const [selectedDomain, setSelectedDomain] = useState('');
@@ -43,31 +54,121 @@ export default function Home({ siteTitle, user }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [createdAccount, setCreatedAccount] = useState(null);
-  const widgetIdRef = useRef(null);
   const [isLoginView, setIsLoginView] = useState(false);
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPasskey, setLoginPasskey] = useState('');
 
-  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY;
+  const [turnstileSiteKey, setTurnstileSiteKey] = useState(initialTurnstileSiteKey || '');
+  const [turnstileRegistrationEnabled, setTurnstileRegistrationEnabled] = useState(
+    Boolean(initialTurnstileRegistrationEnabled)
+  );
+  const [turnstileLoginEnabled, setTurnstileLoginEnabled] = useState(
+    Boolean(initialTurnstileLoginEnabled)
+  );
+  const registerContainerRef = useRef(null);
+  const loginContainerRef = useRef(null);
+  const registerWidgetIdRef = useRef(null);
+  const loginWidgetIdRef = useRef(null);
+  const [registerToken, setRegisterToken] = useState('');
+  const [loginToken, setLoginToken] = useState('');
 
   useEffect(() => {
+    setTurnstileSiteKey(initialTurnstileSiteKey || '');
+    setTurnstileRegistrationEnabled(Boolean(initialTurnstileRegistrationEnabled));
+    setTurnstileLoginEnabled(Boolean(initialTurnstileLoginEnabled));
+  }, [initialTurnstileSiteKey, initialTurnstileRegistrationEnabled, initialTurnstileLoginEnabled]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
     if (user) return;
-    if (!siteKey || !showCaptcha) return;
-    const script = document.createElement('script');
-    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
-    script.async = true;
-    document.body.appendChild(script);
-    script.onload = () => {
-      widgetIdRef.current = window.turnstile.render('#cf-turnstile', {
-        sitekey: siteKey,
-        callback: handleCaptcha,
-      });
+
+    const requiresTurnstile =
+      Boolean(turnstileSiteKey) && (turnstileRegistrationEnabled || turnstileLoginEnabled);
+
+    if (!requiresTurnstile) {
+      if (registerWidgetIdRef.current && window.turnstile) {
+        window.turnstile.remove(registerWidgetIdRef.current);
+      }
+      if (loginWidgetIdRef.current && window.turnstile) {
+        window.turnstile.remove(loginWidgetIdRef.current);
+      }
+      registerWidgetIdRef.current = null;
+      loginWidgetIdRef.current = null;
+      setRegisterToken('');
+      setLoginToken('');
+      return;
+    }
+
+    const renderWidgets = () => {
+      if (!window.turnstile) return;
+
+      if (turnstileRegistrationEnabled && registerContainerRef.current) {
+        if (registerWidgetIdRef.current) {
+          window.turnstile.reset(registerWidgetIdRef.current);
+        } else {
+          registerWidgetIdRef.current = window.turnstile.render(registerContainerRef.current, {
+            sitekey: turnstileSiteKey,
+            callback: token => setRegisterToken(token),
+            'expired-callback': () => setRegisterToken(''),
+            'error-callback': () => setRegisterToken(''),
+          });
+        }
+      } else if (registerWidgetIdRef.current) {
+        window.turnstile.remove(registerWidgetIdRef.current);
+        registerWidgetIdRef.current = null;
+        setRegisterToken('');
+      }
+
+      if (turnstileLoginEnabled && loginContainerRef.current) {
+        if (loginWidgetIdRef.current) {
+          window.turnstile.reset(loginWidgetIdRef.current);
+        } else {
+          loginWidgetIdRef.current = window.turnstile.render(loginContainerRef.current, {
+            sitekey: turnstileSiteKey,
+            callback: token => setLoginToken(token),
+            'expired-callback': () => setLoginToken(''),
+            'error-callback': () => setLoginToken(''),
+          });
+        }
+      } else if (loginWidgetIdRef.current) {
+        window.turnstile.remove(loginWidgetIdRef.current);
+        loginWidgetIdRef.current = null;
+        setLoginToken('');
+      }
     };
+
+    if (window.turnstile) {
+      renderWidgets();
+      return;
+    }
+
+    let script = document.querySelector('script[data-turnstile-script]');
+    const handleLoad = () => {
+      if (script) {
+        script.setAttribute('data-loaded', 'true');
+      }
+      renderWidgets();
+    };
+
+    if (!script) {
+      script = document.createElement('script');
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+      script.async = true;
+      script.defer = true;
+      script.setAttribute('data-turnstile-script', 'true');
+      script.addEventListener('load', handleLoad);
+      document.head.appendChild(script);
+    } else {
+      script.addEventListener('load', handleLoad);
+      if (script.getAttribute('data-loaded') === 'true' || script.readyState === 'complete') {
+        renderWidgets();
+      }
+    }
+
     return () => {
-      document.body.removeChild(script);
-      widgetIdRef.current = null;
+      script?.removeEventListener('load', handleLoad);
     };
-  }, [siteKey, showCaptcha, user]);
+  }, [user, turnstileSiteKey, turnstileRegistrationEnabled, turnstileLoginEnabled]);
 
   useEffect(() => {
     if (user) return;
@@ -102,35 +203,15 @@ export default function Home({ siteTitle, user }) {
     setEmailInput(randomPrefix);
   };
 
-  const handleCaptcha = async token => {
-    if (!selectedDomain || !emailInput) return;
-    
-    setShowCaptcha(false);
-    setStarted(true);
-    
-    const domain = domains.find(d => d.name === selectedDomain);
-    const fullEmail = `${emailInput}@${domain.name}`;
-    
-    const res = await fetch('/api/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        cf_turnstile_token: token,
-        domainName: selectedDomain,
-        email_prefix: emailInput
-      }),
-    });
-    const { email: alias, apiKey: key } = await res.json();
-    if (alias && key) {
-      setEmail(alias);
-      setApiKey(key);
-    }
-  };
-
 
   const handleSubmit = async () => {
     if (!emailInput || !selectedDomain) {
       setError('Please enter an email address');
+      return;
+    }
+
+    if (turnstileRegistrationEnabled && turnstileSiteKey && !registerToken) {
+      setError('Please complete the Turnstile challenge.');
       return;
     }
 
@@ -139,14 +220,20 @@ export default function Home({ siteTitle, user }) {
     setError('');
 
     try {
+      const payload = {
+        userEmail: emailInput,
+        emailType: 'username',
+        domainName: selectedDomain,
+      };
+
+      if (turnstileRegistrationEnabled && turnstileSiteKey) {
+        payload.turnstileToken = registerToken;
+      }
+
       const res = await fetch('/api/users/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userEmail: emailInput,
-          emailType: 'username',
-          domainName: selectedDomain
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -174,6 +261,10 @@ export default function Home({ siteTitle, user }) {
       console.error('Account creation error:', err);
       setError('Failed to create account. Please try again.');
     } finally {
+      if (turnstileRegistrationEnabled && typeof window !== 'undefined' && window.turnstile && registerWidgetIdRef.current) {
+        window.turnstile.reset(registerWidgetIdRef.current);
+        setRegisterToken('');
+      }
       setIsLoading(false);
     }
   };
@@ -183,13 +274,21 @@ export default function Home({ siteTitle, user }) {
       setError('Please enter both email and passkey.');
       return;
     }
+    if (turnstileLoginEnabled && turnstileSiteKey && !loginToken) {
+      setError('Please complete the Turnstile challenge.');
+      return;
+    }
     setIsLoading(true);
     setError('');
     try {
+      const payload = { email: loginEmail, passkey: loginPasskey };
+      if (turnstileLoginEnabled && turnstileSiteKey) {
+        payload.turnstileToken = loginToken;
+      }
       const res = await fetch('/api/users/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: loginEmail, passkey: loginPasskey }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (data.success) {
@@ -201,6 +300,10 @@ export default function Home({ siteTitle, user }) {
       console.error('Login error:', err);
       setError('An error occurred during login.');
     } finally {
+      if (turnstileLoginEnabled && typeof window !== 'undefined' && window.turnstile && loginWidgetIdRef.current) {
+        window.turnstile.reset(loginWidgetIdRef.current);
+        setLoginToken('');
+      }
       setIsLoading(false);
     }
   };
@@ -308,6 +411,11 @@ export default function Home({ siteTitle, user }) {
                       placeholder="Your passkey"
                       disabled={isLoading}
                     />
+                    {turnstileLoginEnabled && turnstileSiteKey && (
+                      <div className="flex justify-center">
+                        <div ref={loginContainerRef} className="cf-turnstile" />
+                      </div>
+                    )}
                     {error && (
                       <div className="bg-red-50 border border-red-200 rounded-md p-3">
                         <p className="text-sm text-red-800">{error}</p>
@@ -315,7 +423,12 @@ export default function Home({ siteTitle, user }) {
                     )}
                     <Button
                       onClick={handleLogin}
-                      disabled={!loginEmail || !loginPasskey || isLoading}
+                      disabled={
+                        !loginEmail ||
+                        !loginPasskey ||
+                        isLoading ||
+                        (turnstileLoginEnabled && turnstileSiteKey && !loginToken)
+                      }
                       className="w-full"
                       size="lg"
                     >
@@ -352,6 +465,11 @@ export default function Home({ siteTitle, user }) {
                       disabled={isLoading || started}
                       onRandom={handleRandomClick}
                     />
+                    {turnstileRegistrationEnabled && turnstileSiteKey && (
+                      <div className="flex justify-center">
+                        <div ref={registerContainerRef} className="cf-turnstile" />
+                      </div>
+                    )}
                     {error && (
                       <div className="bg-red-50 border border-red-200 rounded-md p-3">
                         <p className="text-sm text-red-800">{error}</p>
@@ -361,7 +479,8 @@ export default function Home({ siteTitle, user }) {
                       onClick={handleSubmit}
                       disabled={
                         (!emailInput || !selectedDomain || domains.length === 0) ||
-                        isLoading
+                        isLoading ||
+                        (turnstileRegistrationEnabled && turnstileSiteKey && !registerToken)
                       }
                       className="w-full"
                       size="lg"
