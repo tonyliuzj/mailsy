@@ -214,11 +214,11 @@ export default function AdminPage({ admin, adminPath }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-gray-100 to-blue-50 p-4">
+    <div className="min-h-screen bg-background text-foreground p-4">
       <div className="max-w-6xl mx-auto pt-6">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-blue-800">
-            Admin Panel {admin.username && <span className="text-gray-500 text-lg font-normal ml-4">{admin.username}</span>}
+          <h1 className="text-3xl font-bold text-foreground">
+            Admin Panel {admin.username && <span className="text-muted-foreground text-lg font-normal ml-4">{admin.username}</span>}
           </h1>
           <button
             onClick={logout}
@@ -229,7 +229,7 @@ export default function AdminPage({ admin, adminPath }) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="bg-card rounded-xl border border-border shadow-sm p-6">
             <form onSubmit={changePwd} className="space-y-4">
               <h2 className="text-xl font-semibold border-b pb-2 mb-3">Change Admin Password</h2>
 
@@ -237,7 +237,7 @@ export default function AdminPage({ admin, adminPath }) {
                 <span className="block font-medium">Current Password</span>
                 <input
                   type="password"
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+                  className="mt-1 block w-full border border-border rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary/40"
                   value={pwd.current}
                   onChange={e => setPwd({ ...pwd, current: e.target.value })}
                 />
@@ -247,7 +247,7 @@ export default function AdminPage({ admin, adminPath }) {
                 <span className="block font-medium">New Password</span>
                 <input
                   type="password"
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+                  className="mt-1 block w-full border border-border rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary/40"
                   value={pwd.new}
                   onChange={e => setPwd({ ...pwd, new: e.target.value })}
                 />
@@ -263,14 +263,14 @@ export default function AdminPage({ admin, adminPath }) {
             </form>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="bg-card rounded-xl border border-border shadow-sm p-6">
             <form onSubmit={changeUsername} className="space-y-4">
               <h2 className="text-xl font-semibold border-b pb-2 mb-3">Change Admin Username</h2>
               <label className="block">
                 <span className="block font-medium">New Username</span>
                 <input
                   type="text"
-                  className="mt-1 block w-full border border-gray-300 rounded-md"
+                  className="mt-1 block w-full border border-border rounded-md"
                   value={newUsername}
                   onChange={e => setNewUsername(e.target.value)}
                   minLength={3}
@@ -287,14 +287,14 @@ export default function AdminPage({ admin, adminPath }) {
             </form>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="bg-card rounded-xl border border-border shadow-sm p-6">
             <form onSubmit={changeAdminPath} className="space-y-4">
               <h2 className="text-xl font-semibold border-b pb-2 mb-3">Change Admin Path</h2>
               <label className="block">
                 <span className="block font-medium">Current Path</span>
                 <input
                   type="text"
-                  className="mt-1 block w-full border border-gray-300 rounded-md"
+                  className="mt-1 block w-full border border-border rounded-md"
                   value={newPath}
                   onChange={e => setNewPath(e.target.value)}
                   minLength={3}
@@ -303,7 +303,7 @@ export default function AdminPage({ admin, adminPath }) {
               </label>
               <button
                 type="submit"
-                className="bg-blue-600 hover:bg-blue-7 text-white px-5 py-2 rounded-md shadow"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md shadow"
               >
                 Change Path
               </button>
@@ -312,7 +312,7 @@ export default function AdminPage({ admin, adminPath }) {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-6 mt-6">
+        <div className="bg-card rounded-xl border border-border shadow-sm p-6 mt-6">
           <form onSubmit={saveSiteTitle} className="space-y-4">
             <h2 className="text-xl font-semibold border-b pb-2 mb-3">General Settings</h2>
             
@@ -320,7 +320,7 @@ export default function AdminPage({ admin, adminPath }) {
               <span className="block font-medium">Site Title</span>
               <input
                 type="text"
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+                className="mt-1 block w-full border border-border rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary/40"
                 value={siteTitle}
                 onChange={e => setSiteTitle(e.target.value)}
               />
@@ -336,10 +336,10 @@ export default function AdminPage({ admin, adminPath }) {
           </form>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-6 mt-6">
+        <div className="bg-card rounded-xl border border-border shadow-sm p-6 mt-6">
           <form onSubmit={saveTurnstileSettings} className="space-y-4">
             <h2 className="text-xl font-semibold border-b pb-2 mb-3">Cloudflare Turnstile</h2>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               Provide the site and secret keys from your Cloudflare dashboard and choose where Turnstile should be enforced.
             </p>
 
@@ -347,7 +347,7 @@ export default function AdminPage({ admin, adminPath }) {
               <span className="block font-medium">Site Key</span>
               <input
                 type="text"
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+                className="mt-1 block w-full border border-border rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary/40"
                 value={turnstileSettings.siteKey}
                 onChange={e => setTurnstileSettings(prev => ({ ...prev, siteKey: e.target.value }))}
                 placeholder="0x0000000000000000000000000000000AA"
@@ -358,7 +358,7 @@ export default function AdminPage({ admin, adminPath }) {
               <span className="block font-medium">Secret Key</span>
               <input
                 type="password"
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+                className="mt-1 block w-full border border-border rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary/40"
                 value={turnstileSettings.secretKey}
                 onChange={e => setTurnstileSettings(prev => ({ ...prev, secretKey: e.target.value }))}
                 placeholder="0x0000000000000000000000000000000AA"
@@ -396,7 +396,7 @@ export default function AdminPage({ admin, adminPath }) {
           </form>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-6 mt-6">
+        <div className="bg-card rounded-xl border border-border shadow-sm p-6 mt-6">
           <form onSubmit={saveDomain} className="space-y-4">
             <h2 className="text-xl font-semibold border-b pb-2 mb-3">Domain Management</h2>
             
@@ -413,7 +413,7 @@ export default function AdminPage({ admin, adminPath }) {
                   <input
                     type={type}
                     name={key}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"
+                    className="mt-1 block w-full border border-border rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary/40"
                     value={domainForm[key] || ''}
                     onChange={e => setDomainForm({ ...domainForm, [key]: e.target.value })}
                   />
@@ -457,7 +457,7 @@ export default function AdminPage({ admin, adminPath }) {
                   setDomainForm({});
                   setDomainMsg('');
                 }}
-                className="bg-gray-500 hover:bg-gray-600 text-white px-5 py-2 rounded-md shadow ml-2"
+                className="bg-muted hover:bg-muted/80 text-foreground px-5 py-2 rounded-md shadow ml-2"
               >
                 Cancel
               </button>
@@ -467,25 +467,27 @@ export default function AdminPage({ admin, adminPath }) {
         </div>
 
         {domains.length > 0 && (
-          <div className="bg-white rounded-xl shadow-lg p-6 mt-6">
+          <div className="bg-card rounded-xl border border-border shadow-sm p-6 mt-6">
             <h2 className="text-xl font-semibold border-b pb-2 mb-3">Domains</h2>
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-border/60">
+              <thead className="bg-muted">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Domain</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IMAP Host</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Domain</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">IMAP Host</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-card divide-y divide-border/60 dark:divide-border/40">
                 {domains.map(domain => (
                   <tr key={domain.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{domain.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{domain.imap_host}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">{domain.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{domain.imap_host}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <span className={`px-2 py-1 rounded-full text-xs ${
-                        domain.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        domain.is_active
+                          ? 'bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-100'
+                          : 'bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-100'
                       }`}>
                         {domain.is_active ? 'Active' : 'Inactive'}
                       </span>

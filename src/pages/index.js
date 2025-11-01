@@ -325,14 +325,14 @@ export default function Home({
             <Card className="h-fit">
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <h2 className="text-2xl font-bold text-foreground transition-colors">
                     Welcome Back!
                   </h2>
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="text-center">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <p className="text-sm text-muted-foreground transition-colors">
                     You are already logged in.
                   </p>
                 </div>
@@ -370,13 +370,13 @@ export default function Home({
               <div className="flex border-b">
                 <button
                   onClick={() => setIsLoginView(false)}
-                  className={`flex-1 py-2 text-center font-medium ${!isLoginView ? 'border-b-2 border-black text-black' : 'text-gray-500'}`}
+                  className={`flex-1 py-2 text-center font-medium border-b-2 transition-colors ${!isLoginView ? 'border-primary text-primary' : 'border-transparent text-muted-foreground'}`}
                 >
                   Create Account
                 </button>
                 <button
                   onClick={() => setIsLoginView(true)}
-                  className={`flex-1 py-2 text-center font-medium ${isLoginView ? 'border-b-2 border-black text-black' : 'text-gray-500'}`}
+                  className={`flex-1 py-2 text-center font-medium border-b-2 transition-colors ${isLoginView ? 'border-primary text-primary' : 'border-transparent text-muted-foreground'}`}
                 >
                   Login
                 </button>
@@ -387,10 +387,10 @@ export default function Home({
               {isLoginView ? (
                 <>
                   <div className="text-center">
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <h2 className="text-2xl font-bold text-foreground transition-colors">
                       Login to Your Account
                     </h2>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-muted-foreground transition-colors">
                       Enter your credentials to access your account.
                     </p>
                   </div>
@@ -417,8 +417,8 @@ export default function Home({
                       </div>
                     )}
                     {error && (
-                      <div className="bg-red-50 border border-red-200 rounded-md p-3">
-                        <p className="text-sm text-red-800">{error}</p>
+                      <div className="bg-red-50 border border-red-200 dark:bg-red-500/10 dark:border-red-400/40 rounded-md p-3">
+                        <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
                       </div>
                     )}
                     <Button
@@ -446,10 +446,10 @@ export default function Home({
               ) : (
                 <>
                   <div className="text-center">
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <h2 className="text-2xl font-bold text-foreground transition-colors">
                       Create Email Address
                     </h2>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <p className="text-sm text-muted-foreground transition-colors">
                       Create your persistent email address with login credentials
                     </p>
                   </div>
@@ -471,8 +471,8 @@ export default function Home({
                       </div>
                     )}
                     {error && (
-                      <div className="bg-red-50 border border-red-200 rounded-md p-3">
-                        <p className="text-sm text-red-800">{error}</p>
+                      <div className="bg-red-50 border border-red-200 dark:bg-red-500/10 dark:border-red-400/40 rounded-md p-3">
+                        <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
                       </div>
                     )}
                     <Button

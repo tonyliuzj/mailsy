@@ -150,7 +150,7 @@ export default function Inbox({ siteTitle, user }) {
 
   const getSnippet = text => {
     const first = (text || '').split('\n')[0];
-    return first.length > 50 ? first.slice(0, 50) + '…' : first;
+    return first.length > 50 ? `${first.slice(0, 50)}...` : first;
   };
 
   const formatDate = (dateString) => {
@@ -303,13 +303,13 @@ export default function Inbox({ siteTitle, user }) {
             </CardHeader>
             <CardContent>
               {success && (
-                <div className="bg-green-50 border border-green-200 rounded-md p-3 mb-4">
-                  <p className="text-sm text-green-800">{success}</p>
+                <div className="bg-green-100 border border-green-200 dark:bg-green-500/15 dark:border-green-500/40 rounded-md p-3 mb-4 transition-colors">
+                  <p className="text-sm font-medium text-green-950 dark:text-green-200">{success}</p>
                 </div>
               )}
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
-                  <p className="text-sm text-red-800">{error}</p>
+                <div className="bg-red-50 border border-red-200 dark:bg-red-500/10 dark:border-red-400/40 rounded-md p-3 mb-4 transition-colors">
+                  <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
                 </div>
               )}
               {userEmails.map(email => (
@@ -321,25 +321,27 @@ export default function Inbox({ siteTitle, user }) {
                       size="sm"
                       onClick={() => copyToClipboard(email.email_address, email.id, 'email')}
                     >
-                      {copyFeedback[`${email.id}-email`] ? '✓ Copied!' : 'Copy'}
+                      {copyFeedback[`${email.id}-email`] ? 'Copied!' : 'Copy'}
                     </Button>
                   </div>
-                  <div className="text-sm text-gray-500 mt-1">
-                    Domain: @{email.domain_name} • Created: {formatDate(email.created_at)}
+                  <div className="text-sm text-muted-foreground mt-1 transition-colors">
+                    Domain: @{email.domain_name} | Created: {formatDate(email.created_at)}
                   </div>
                   <div className="mt-4">
                     <div className="flex items-center justify-between">
-                      <label className="text-sm font-medium text-gray-700">Passkey:</label>
+                      <label className="text-sm font-medium text-muted-foreground">Passkey:</label>
                     </div>
                     <div className="flex items-center space-x-2 mt-1">
-                      <code className={`flex-1 text-xs p-2 rounded transition-colors ${
+                      <code
+                        className={`flex-1 text-xs p-2 rounded transition-colors ${
                         firstTimeUsers.has(email.id)
-                          ? 'bg-blue-100 border-2 border-blue-300 text-blue-900'
+                          ? 'bg-blue-100 border-2 border-blue-200 text-blue-900 dark:bg-blue-500/10 dark:border-blue-400/40 dark:text-blue-100'
                           : newlyGeneratedPasskeys.has(email.id) 
-                            ? 'bg-green-100 border-2 border-green-300 text-green-900' 
-                            : 'bg-gray-100'
-                      }`}>
-                        {email.passkey ? email.passkey : '••••••••••••••••'}
+                            ? 'bg-green-100 border-2 border-green-200 text-green-900 dark:bg-green-500/20 dark:border-green-400/40 dark:text-green-100' 
+                            : 'bg-muted'
+                      }`}
+                      >
+                        {email.passkey ? email.passkey : '***************'}
                       </code>
                       {email.passkey && (
                         <Button
@@ -347,18 +349,18 @@ export default function Inbox({ siteTitle, user }) {
                           size="sm"
                           onClick={() => copyToClipboard(email.passkey, email.id, 'passkey')}
                         >
-                          {copyFeedback[`${email.id}-passkey`] ? '✓ Copied!' : 'Copy'}
+                          {copyFeedback[`${email.id}-passkey`] ? 'Copied!' : 'Copy'}
                         </Button>
                       )}
                     </div>
                     {firstTimeUsers.has(email.id) && (
                       <p className="text-xs text-blue-700 mt-1">
-                        🎉 Welcome! Your passkey is visible. Click "Mask Passkey" when you're ready to hide it.
+                        Welcome! Your passkey is visible. Click "Mask Passkey" when you're ready to hide it.
                       </p>
                     )}
                     {newlyGeneratedPasskeys.has(email.id) && (
                       <p className="text-xs text-green-700 mt-1">
-                        🔑 New passkey generated! Click "Mask Passkey" when you're ready to hide it.
+                        New passkey generated! Click "Mask Passkey" when you're ready to hide it.
                       </p>
                     )}
                   </div>
@@ -399,22 +401,22 @@ export default function Inbox({ siteTitle, user }) {
             <CardContent className="p-0 h-full flex flex-col">
               {selectedEmail ? (
                 <div className="flex flex-col flex-1">
-                  <div className="border-b dark:border-gray-700">
+                  <div className="border-b border-border transition-colors">
                     <div className="p-6">
                       <Button
                         variant="ghost"
                         onClick={() => setSelectedEmail(null)}
-                        className="flex items-center text-gray-600 dark:text-gray-400 mb-4"
+                        className="flex items-center text-muted-foreground mb-4"
                       >
-                        ← Back to inbox
+                        {'\u2190'} Back to inbox
                       </Button>
                     </div>
-                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                    <h2 className="text-xl font-semibold text-foreground mb-2">
                       {selectedEmail.subject || '(no subject)'}
                     </h2>
-                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    <div className="flex items-center text-sm text-muted-foreground mb-4">
                       <span className="font-medium">{selectedEmail.from}</span>
-                      <span className="mx-2">•</span>
+                      <span className="mx-2" aria-hidden="true">|</span>
                       <span>{new Date(selectedEmail.date).toLocaleString()}</span>
                     </div>
                   </div>
@@ -425,7 +427,7 @@ export default function Inbox({ siteTitle, user }) {
                         dangerouslySetInnerHTML={{ __html: selectedEmail.html }}
                       />
                     ) : (
-                      <pre className="whitespace-pre-wrap break-words text-sm text-gray-800 dark:text-gray-200 font-mono">
+                      <pre className="whitespace-pre-wrap break-words text-sm text-foreground font-mono">
                         {selectedEmail.text}
                       </pre>
                     )}
@@ -433,10 +435,10 @@ export default function Inbox({ siteTitle, user }) {
                 </div>
               ) : (
                 <div className="flex-1 overflow-hidden flex flex-col">
-                  <div className="p-6 border-b dark:border-gray-700">
+                  <div className="p-6 border-b border-border transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        <h3 className="text-lg font-semibold text-foreground">
                           Inbox
                         </h3>
                       </div>
@@ -444,7 +446,7 @@ export default function Inbox({ siteTitle, user }) {
                         {isRefreshing ? (
                           <LoadingSpinner size="sm" />
                         ) : null}
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                        <span className="text-sm text-muted-foreground">
                           {isRefreshing ? 'Checking...' : `Next check in ${countdown}s`}
                         </span>
                       </div>
@@ -456,37 +458,37 @@ export default function Inbox({ siteTitle, user }) {
                   
                   <div className="flex-1 overflow-y-auto">
                     {inbox.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400">
-                        <span className="text-4xl mb-4 opacity-50">📭</span>
+                      <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                        <span className="text-4xl mb-4 opacity-50">{'\u2709'}</span>
                         <p className="mt-4 text-lg font-medium">No messages yet</p>
                         <p className="text-sm">
                           Your inbox is empty. Emails will appear here when they arrive.
                         </p>
                       </div>
                     ) : (
-                      <div className="divide-y dark:divide-gray-700">
+                      <div className="divide-y divide-border/60 dark:divide-border/40 transition-colors">
                         {inbox.map((email) => (
                           <div
                             key={email.uid}
                             onClick={() => setSelectedEmail(email)}
-                            className="grid grid-cols-[auto_1fr_auto_3fr_auto_auto] items-start gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+                            className="grid grid-cols-[auto_1fr_auto_3fr_auto_auto] items-start gap-4 p-4 hover:bg-muted/40 dark:hover:bg-muted/30 cursor-pointer transition-colors"
                           >
                             <div className="flex items-start">
-                              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                                <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-muted dark:bg-muted/60 transition-colors flex items-center justify-center">
+                                <span className="text-xs font-medium text-muted-foreground">
                                   {email.from.charAt(0).toUpperCase()}
                                 </span>
                               </div>
                             </div>
                             <div className="min-w-0">
-                              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                              <p className="text-sm font-medium text-foreground truncate">
                                 {email.subject || '(no subject)'}
                               </p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                              <p className="text-sm text-muted-foreground truncate">
                                 {getSnippet(email.text)}
                               </p>
                             </div>
-                            <div className="text-right text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                            <div className="text-right text-xs text-muted-foreground whitespace-nowrap">
                               {formatDate(email.date)}
                             </div>
                           </div>
@@ -503,3 +505,5 @@ export default function Inbox({ siteTitle, user }) {
     </Layout>
   );
 }
+
+

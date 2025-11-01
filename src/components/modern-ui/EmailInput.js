@@ -56,8 +56,8 @@ const getDisplayText = () => {
 
   if (domains.length === 0) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-md p-4">
-        <p className="text-sm text-red-800">
+      <div className="bg-red-50 border border-red-200 dark:bg-red-500/10 dark:border-red-400/40 rounded-md p-4">
+        <p className="text-sm text-red-800 dark:text-red-200">
           No active domains available. Please contact the administrator.
         </p>
       </div>
@@ -67,7 +67,7 @@ const getDisplayText = () => {
   return (
     <div className="space-y-2">
       {label && (
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-sm font-medium text-muted-foreground">
           {label}
         </label>
       )}
@@ -81,16 +81,14 @@ const getDisplayText = () => {
               onChange={handleInputChange}
               placeholder={placeholder}
               disabled={disabled}
-              className={`flex-1 min-w-0 block w-full px-3 py-2 rounded-l-md border border-r-0 border-gray-300 shadow-sm focus:outline-none focus:ring-black focus:border-black ${
-                disabled ? 'bg-gray-100 cursor-not-allowed' : ''
-              }`}
+              className="flex-1 min-w-0 block w-full px-3 py-2 rounded-l-md border border-r-0 border-border shadow-sm bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background focus:border-primary disabled:bg-muted/60 disabled:text-muted-foreground disabled:cursor-not-allowed"
             />
             <div className="relative">
-<select
+              <select
                 value={selectedDomain}
                 onChange={(e) => onDomainChange(e.target.value)}
                 disabled={disabled}
-                className="appearance-none bg-white border border-l-0 border-gray-300 px-3 py-2 pr-8 focus:outline-none focus:ring-black focus:border-black disabled:bg-gray-100 disabled:cursor-not-allowed"
+                className="appearance-none bg-background border border-l-0 border-border px-3 py-2 pr-8 text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background focus:border-primary disabled:bg-muted/60 disabled:text-muted-foreground disabled:cursor-not-allowed"
               >
                 {domains.map(domain => (
                   <option key={domain.id} value={domain.name}>
@@ -99,7 +97,7 @@ const getDisplayText = () => {
                 ))}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
@@ -110,16 +108,14 @@ const getDisplayText = () => {
               type="button"
               onClick={handleRandomClick}
               disabled={disabled}
-              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-md text-sm font-medium text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 bg-muted hover:bg-muted/80 border border-border rounded-md text-sm font-medium text-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              🎲 Random
+              Random
             </button>
           )}
         </div>
-        
-        {}
-        <div className="mt-1 text-sm text-gray-500">
-          Full email: <span className="font-mono bg-gray-100 px-2 py-1 rounded">
+        <div className="mt-1 text-sm text-muted-foreground">
+          Full email: <span className="font-mono bg-muted px-2 py-1 rounded text-foreground">
             {getDisplayText()}
           </span>
         </div>

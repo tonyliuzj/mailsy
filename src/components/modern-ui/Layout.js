@@ -1,101 +1,121 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Button } from './Button';
-import { Badge } from './Badge';
+
+const ICONS = {
+  sun: '\u2600', // ☀
+  moon: '\u263E', // ☾
+  close: '\u2715', // ✕
+  menu: '\u2630', // ☰
+  home: '\u2302', // ⌂
+};
 
 export function Layout({ children, siteTitle = 'Mailsy', user }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const root = document.documentElement;
+    setDarkMode(root.classList.contains('dark'));
+  }, []);
+
   const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    
-    if (!darkMode) {
+    const nextMode = !darkMode;
+    setDarkMode(nextMode);
+
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    if (nextMode) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
   };
 
+  const closeMenu = () => setIsMenuOpen(false);
+
+  const navLinkClasses =
+    'px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors';
+
+  const mobileNavLinkClasses =
+    'block px-3 py-2 rounded-md text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors';
+
   return (
-    <div className={`min-h-screen ${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
-      {}
-      <nav className={`${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-sm border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+    <div className={`min-h-screen bg-background text-foreground transition-colors ${darkMode ? 'dark' : ''}`}>
+      <nav className="bg-card/80 backdrop-blur shadow-sm border-b border-border transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <Link href="/" className="flex items-center space-x-3">
                 <div className="flex-shrink-0">
-                  <div className="h-8 w-8 rounded-lg bg-black flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">M</span>
+                  <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
+                    <span className="text-primary-foreground font-bold text-sm">M</span>
                   </div>
                 </div>
                 <div className="hidden md:block">
-                  <h1 className="text-xl font-bold">{siteTitle}</h1>
+                  <h1 className="text-xl font-bold text-foreground transition-colors">{siteTitle}</h1>
                 </div>
               </Link>
             </div>
-            
+
             <div className="hidden md:flex items-center space-x-4">
-              <Link
-                href="/"
-                className={`px-3 py-2 rounded-md text-sm font-medium ${darkMode ? 'text-gray-300 hover:text-white hover:bg-gray-700' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'}`}
-              >
+              <Link href="/" className={navLinkClasses}>
                 Home
               </Link>
               {user && (
-                <Link
-                  href="/inbox"
-                  className={`px-3 py-2 rounded-md text-sm font-medium ${darkMode ? 'text-gray-300 hover:text-white hover:bg-gray-700' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'}`}
-                >
+                <Link href="/inbox" className={navLinkClasses}>
                   Inbox
                 </Link>
               )}
               <button
+                type="button"
                 onClick={toggleDarkMode}
-                className={`p-2 rounded-md ${darkMode ? 'text-gray-400 hover:text-white hover:bg-gray-700' : 'text-gray-400 hover:text-gray-700 hover:bg-gray-200'}`}
+                className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                aria-label="Toggle theme"
+                aria-pressed={darkMode}
               >
-                {darkMode ? '☀️' : '🌙'}
+                {darkMode ? ICONS.sun : ICONS.moon}
               </button>
             </div>
-            
-            {}
+
             <div className="md:hidden flex items-center">
               <button
+                type="button"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className={`inline-flex items-center justify-center p-2 rounded-md ${darkMode ? 'text-gray-400 hover:text-white hover:bg-gray-700' : 'text-gray-400 hover:text-gray-700 hover:bg-gray-200'}`}
+                className="inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                aria-label="Toggle navigation menu"
+                aria-expanded={isMenuOpen}
               >
-                {isMenuOpen ? '✕' : '☰'}
+                {isMenuOpen ? ICONS.close : ICONS.menu}
               </button>
             </div>
           </div>
         </div>
-        
-        {}
+
         {isMenuOpen && (
-          <div className="md:hidden">
+          <div className="md:hidden border-t border-border/60 transition-colors">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              <Link
-                href="/"
-                className={`block px-3 py-2 rounded-md text-base font-medium ${darkMode ? 'text-gray-300 hover:text-white hover:bg-gray-700' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'}`}
-                onClick={() => setIsMenuOpen(false)}
-              >
+              <Link href="/" className={mobileNavLinkClasses} onClick={closeMenu}>
                 Home
               </Link>
               {user && (
-                <Link
-                  href="/inbox"
-                  className={`block px-3 py-2 rounded-md text-base font-medium ${darkMode ? 'text-gray-300 hover:text-white hover:bg-gray-700' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'}`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
+                <Link href="/inbox" className={mobileNavLinkClasses} onClick={closeMenu}>
                   Inbox
                 </Link>
               )}
               <button
-                onClick={toggleDarkMode}
-                className={`flex items-center w-full px-3 py-2 rounded-md text-base font-medium ${darkMode ? 'text-gray-300 hover:text-white hover:bg-gray-700' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'}`}
+                type="button"
+                onClick={() => {
+                  toggleDarkMode();
+                  closeMenu();
+                }}
+                className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                aria-label="Toggle theme"
+                aria-pressed={darkMode}
               >
-                {darkMode ? '☀️' : '🌙'}
+                {darkMode ? ICONS.sun : ICONS.moon}
                 <span className="ml-2">{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
               </button>
             </div>
@@ -103,38 +123,34 @@ export function Layout({ children, siteTitle = 'Mailsy', user }) {
         )}
       </nav>
 
-      {}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {children}
-      </main>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 transition-colors">{children}</main>
 
-      {}
-      <footer className={`${darkMode ? 'bg-gray-800 border-t border-gray-700' : 'bg-gray-50 border-t border-gray-200'} py-8`}>
+      <footer className="bg-card border-t border-border py-8 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="md:flex md:items-center md:justify-between">
             <div className="flex justify-center space-x-6 md:order-2">
-              <Link href="/" className={`text-gray-400 hover:text-gray-500 ${darkMode ? 'hover:text-gray-300' : ''}`}>
+              <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors">
                 <span className="sr-only">Home</span>
-                🏠
+                {ICONS.home}
               </Link>
             </div>
             <div className="mt-8 md:order-1 md:mt-0">
-              <p className={`text-center text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                © 2024 Mailsy. A modern temporary email service.{' '}
+              <p className="text-center text-xs text-muted-foreground transition-colors">
+                © 2024 Mailsy. A modern temporary email service{' '}
                 <Link
                   href="https://github.com/tonyliuzj/Mailsy"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'} underline`}
+                  className="underline text-foreground hover:text-primary transition-colors"
                 >
                   Open source
-                </Link>
-                {' '} powered by{' '}
+                </Link>{' '}
+                powered by{' '}
                 <Link
                   href="https://tony-liu.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'} underline`}
+                  className="underline text-foreground hover:text-primary transition-colors"
                 >
                   tony-liu.com
                 </Link>

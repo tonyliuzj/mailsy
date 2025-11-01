@@ -42,32 +42,39 @@ export default function Login({ adminPath }) {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <form onSubmit={submit}
-            className="bg-white p-6 rounded shadow w-full max-w-sm">
-        <h1 className="text-xl font-bold mb-4">Admin Login</h1>
-        {error && <p className="text-red-500">{error}</p>}
-        <label className="block mb-2">
+    <div className="min-h-screen flex items-center justify-center bg-background text-foreground px-4">
+      <form
+        onSubmit={submit}
+        className="w-full max-w-sm rounded-lg border border-border bg-card shadow-sm p-6 space-y-4"
+      >
+        <h1 className="text-xl font-bold">Admin Login</h1>
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        <label className="block text-sm font-medium text-muted-foreground">
           Username
-          <input value={username}
-                 onChange={e => setUsername(e.target.value)}
-                 className="w-full border p-2 rounded mt-1"
-                 autoFocus
-                 autoComplete="username"
-                 required
+          <input
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+            className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
+            autoFocus
+            autoComplete="username"
+            required
           />
         </label>
-        <label className="block mb-4">
+        <label className="block text-sm font-medium text-muted-foreground">
           Password
-          <input type="password" value={password}
-                 onChange={e => setPassword(e.target.value)}
-                 className="w-full border p-2 rounded mt-1"
-                 autoComplete="current-password"
-                 required
+          <input
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
+            autoComplete="current-password"
+            required
           />
         </label>
-        <button type="submit"
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded">
+        <button
+          type="submit"
+          className="w-full rounded-md bg-primary py-2 text-primary-foreground hover:bg-primary/90 transition-colors"
+        >
           Login
         </button>
       </form>
