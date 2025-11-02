@@ -1,4 +1,4 @@
-import { getSessionCookie, clearSessionCookie, withSessionRoute } from './session.js'
+import { getSessionCookie, withSessionRoute } from './session.js'
 import { getSession } from './db.js'
 
 export function withUserAuth(handler) {

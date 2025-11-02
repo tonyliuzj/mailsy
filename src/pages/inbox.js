@@ -19,7 +19,7 @@ export const getServerSideProps = withUser(async ({ user }) => {
         user: user || null,
       }
     };
-  } catch (error) {
+  } catch {
     return {
       props: {
         siteTitle: 'Mailsy',
@@ -148,7 +148,7 @@ export default function Inbox({ siteTitle, user }) {
         }
       });
     };
-  }, []);
+  }, [passkeyTimers]);
 
   const getSnippet = text => {
     const first = (text || '').split('\n')[0];
@@ -356,13 +356,13 @@ export default function Inbox({ siteTitle, user }) {
                       )}
                     </div>
                     {firstTimeUsers.has(email.id) && (
-                      <p className="text-xs text-blue-700 mt-1">
-                        Welcome! Your passkey is visible. Click "Mask Passkey" when you're ready to hide it.
+                    <p className="text-xs text-blue-700 mt-1">
+                        Welcome! Your passkey is visible. Click &quot;Mask Passkey&quot; when you&apos;re ready to hide it.
                       </p>
                     )}
                     {newlyGeneratedPasskeys.has(email.id) && (
-                      <p className="text-xs text-green-700 mt-1">
-                        New passkey generated! Click "Mask Passkey" when you're ready to hide it.
+                    <p className="text-xs text-green-700 mt-1">
+                        New passkey generated! Click &quot;Mask Passkey&quot; when you&apos;re ready to hide it.
                       </p>
                     )}
                   </div>

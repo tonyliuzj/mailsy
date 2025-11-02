@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid'
 const SESSION_COOKIE_NAME = 'mailsy_user_session'
 const SESSION_DURATION_DAYS = 30
 
-export function createSessionCookie(userId) {
+export function createSessionCookie() {
   const sessionToken = nanoid(64)
   const expiresAt = new Date()
   expiresAt.setDate(expiresAt.getDate() + SESSION_DURATION_DAYS)

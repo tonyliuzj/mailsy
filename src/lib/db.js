@@ -2,7 +2,6 @@ import Database from 'better-sqlite3'
 import bcrypt from 'bcryptjs'
 import path from 'path'
 import fs from 'fs'
-import { nanoid } from 'nanoid'
 
 const dbPath = path.join(process.cwd(), 'data', 'temp-mail.db')
 fs.mkdirSync(path.dirname(dbPath), { recursive: true })

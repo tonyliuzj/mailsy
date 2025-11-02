@@ -60,7 +60,7 @@ async function handler(req, res) {
           const messages = []
           const fetch = imap.fetch(uids, { bodies: '' })
 
-          fetch.on('message', (msg, seqno) => {
+          fetch.on('message', (msg) => {
             let buffer = ''
             let uid = null
             
@@ -74,13 +74,13 @@ async function handler(req, res) {
             })
           })
 
-          fetch.once('error', (err) => reject(new Error('An error occurred while fetching emails.')))
+          fetch.once('error', () => reject(new Error('An error occurred while fetching emails.')))
           fetch.once('end', () => resolve(messages))
         })
       })
     })
 
-    imap.once('error', (err) => reject(new Error('A connection error occurred.')))
+    imap.once('error', () => reject(new Error('A connection error occurred.')))
     imap.connect()
   })
 

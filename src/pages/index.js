@@ -24,7 +24,7 @@ export const getServerSideProps = withUser(async ({ user }) => {
         turnstileLoginEnabled: Boolean(turnstile.loginEnabled),
       },
     };
-  } catch (error) {
+  } catch {
     return {
       props: {
         siteTitle: 'Mailsy',
@@ -45,17 +45,12 @@ export default function Home({
   turnstileLoginEnabled: initialTurnstileLoginEnabled,
 }) {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [apiKey, setApiKey] = useState('');
   const [started, setStarted] = useState(false);
   const [domains, setDomains] = useState([]);
   const [selectedDomain, setSelectedDomain] = useState('');
   const [emailInput, setEmailInput] = useState('');
-  const [password, setPassword] = useState('');
-  const [generatedPassword, setGeneratedPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [createdAccount, setCreatedAccount] = useState(null);
   const [isLoginView, setIsLoginView] = useState(false);
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPasskey, setLoginPasskey] = useState('');
@@ -244,17 +239,10 @@ export default function Home({
         localStorage.setItem('email', data.email.email);
         localStorage.setItem('apiKey', data.email.apiKey);
         localStorage.setItem('passkey', data.passkey);
-        setCreatedAccount({
-          email: data.email.email,
-          passkey: data.passkey
-        });
-        setEmail(data.email.email);
-        setApiKey(data.email.apiKey);
         setStarted(true);
         
         
         setEmailInput('');
-        setPassword('');
         router.push('/inbox');
       } else {
         setError(data.error || 'Failed to create account');

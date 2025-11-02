@@ -1,6 +1,4 @@
-import React from 'react';
-
-export function Icon({ name, className = '', ...props }) {
+export function Icon() {
   
   return null;
 }

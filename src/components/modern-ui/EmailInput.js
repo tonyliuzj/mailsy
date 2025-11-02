@@ -13,7 +13,6 @@ export function EmailInput({
   onDomainChange, 
   placeholder = "your-email",
   disabled = false,
-  accountType = "temporary",
   onRandom = null
 }) {
   const [localValue, setLocalValue] = useState('');
