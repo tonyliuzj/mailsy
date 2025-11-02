@@ -60,14 +60,14 @@ export function EmailInput({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 overflow-visible">
       {label && (
         <label className="block text-sm font-medium text-muted-foreground">
           {label}
         </label>
       )}
-      <div className="flex gap-2">
-        <div className="flex-1 flex">
+      <div className="flex gap-2 overflow-visible">
+        <div className="flex-1 flex relative z-10 overflow-visible">
           <ShadcnInput
             type="text"
             value={localValue}
@@ -80,7 +80,7 @@ export function EmailInput({
             value={selectedDomain}
             onChange={(e) => onDomainChange(e.target.value)}
             disabled={disabled}
-            className="appearance-none bg-background border border-l-0 border-input px-3 py-2 pr-8 text-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded-r-md"
+            className="appearance-none h-9 bg-background border border-l-0 border-input px-3 py-1 pr-8 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded-r-md relative z-20"
           >
             {domains.map(domain => (
               <option key={domain.id} value={domain.name}>
