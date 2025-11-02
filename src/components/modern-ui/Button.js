@@ -1,60 +1,63 @@
+'use client';
+
 import React from 'react';
+import { Button as ShadcnButton } from '../ui/button';
 
 export function Button({ children, variant = 'default', size = 'md', className = '', ...props }) {
-  const baseClasses =
-    'inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:pointer-events-none';
-
-  const variants = {
-    default: 'bg-primary text-primary-foreground hover:bg-primary/90',
-    primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
-    secondary: 'bg-muted text-foreground hover:bg-muted/80 border border-border focus:ring-border',
-    outline: 'border border-border bg-background text-foreground hover:bg-accent focus:ring-border',
-    destructive: 'bg-red-600 text-white hover:bg-red-500 focus:ring-red-600',
-    ghost: 'text-foreground hover:bg-muted/60 focus:ring-muted',
-    link: 'text-primary underline-offset-2 hover:underline'
+  // Map custom variants to shadcn variants
+  const variantMap = {
+    default: 'default',
+    primary: 'default',
+    secondary: 'secondary',
+    outline: 'outline',
+    destructive: 'destructive',
+    ghost: 'ghost',
+    link: 'link'
   };
 
-  const sizes = {
-    sm: 'px-3 py-2 text-sm',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-6 py-3 text-base',
-    xl: 'px-8 py-4 text-base'
+  // Map custom sizes to shadcn sizes
+  const sizeMap = {
+    sm: 'sm',
+    md: 'default',
+    lg: 'lg',
+    xl: 'lg'
   };
 
   return (
-    <button
-      className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`}
+    <ShadcnButton
+      variant={variantMap[variant] || 'default'}
+      size={sizeMap[size] || 'default'}
+      className={className}
       {...props}
     >
       {children}
-    </button>
+    </ShadcnButton>
   );
 }
 
 export function IconButton({ children, variant = 'ghost', size = 'md', className = '', ...props }) {
-  const baseClasses =
-    'inline-flex items-center justify-center rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:pointer-events-none';
-
-  const variants = {
-    primary: 'text-foreground hover:bg-muted/60',
-    secondary: 'text-muted-foreground hover:bg-muted/50',
-    ghost: 'text-muted-foreground hover:bg-muted/60',
-    link: 'text-primary underline-offset-2 hover:underline'
+  const variantMap = {
+    primary: 'ghost',
+    secondary: 'ghost',
+    ghost: 'ghost',
+    link: 'link'
   };
 
-  const sizes = {
-    sm: 'p-2 text-sm',
-    md: 'p-2.5 text-sm',
-    lg: 'p-3 text-base',
-    xl: 'p-3.5 text-base'
+  const sizeMap = {
+    sm: 'sm',
+    md: 'default',
+    lg: 'lg',
+    xl: 'lg'
   };
 
   return (
-    <button
-      className={`${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`}
+    <ShadcnButton
+      variant={variantMap[variant] || 'ghost'}
+      size={sizeMap[size] || 'default'}
+      className={className}
       {...props}
     >
       {children}
-    </button>
+    </ShadcnButton>
   );
 }

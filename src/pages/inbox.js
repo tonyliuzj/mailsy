@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { Card, CardContent, CardHeader } from '../components/modern-ui/Card';
@@ -402,7 +404,7 @@ export default function Inbox({ siteTitle, user }) {
               {selectedEmail ? (
                 <div className="flex flex-col flex-1">
                   <div className="border-b border-border transition-colors">
-                    <div className="p-6">
+                    <div className="p-6 pb-0">
                       <Button
                         variant="ghost"
                         onClick={() => setSelectedEmail(null)}
@@ -411,10 +413,10 @@ export default function Inbox({ siteTitle, user }) {
                         {'\u2190'} Back to inbox
                       </Button>
                     </div>
-                    <h2 className="text-xl font-semibold text-foreground mb-2">
+                    <h2 className="text-xl font-semibold text-foreground mb-2 px-6">
                       {selectedEmail.subject || '(no subject)'}
                     </h2>
-                    <div className="flex items-center text-sm text-muted-foreground mb-4">
+                    <div className="flex items-center text-sm text-muted-foreground mb-4 px-6 pb-6">
                       <span className="font-medium">{selectedEmail.from}</span>
                       <span className="mx-2" aria-hidden="true">|</span>
                       <span>{new Date(selectedEmail.date).toLocaleString()}</span>
@@ -423,13 +425,13 @@ export default function Inbox({ siteTitle, user }) {
                   <div className="flex-1 overflow-y-auto p-6">
                     {selectedEmail.html ? (
                       <div
-                        className="prose prose max-w-none dark:prose-invert"
+                        className="prose prose-sm dark:prose-invert max-w-none w-full prose-headings:text-foreground prose-p:text-foreground prose-a:text-primary prose-strong:text-foreground prose-code:text-foreground prose-pre:bg-muted prose-pre:text-foreground prose-img:max-w-full prose-img:h-auto prose-table:w-full prose-table:table-auto prose-blockquote:border-l-2 prose-blockquote:pl-4 prose-ul:list-disc prose-ol:list-decimal overflow-hidden break-words"
                         dangerouslySetInnerHTML={{ __html: selectedEmail.html }}
                       />
                     ) : (
-                      <pre className="whitespace-pre-wrap break-words text-sm text-foreground font-mono">
+                      <div className="text-sm text-foreground whitespace-pre-wrap break-words font-mono bg-muted/50 p-4 rounded-md border border-border max-w-none w-full overflow-hidden">
                         {selectedEmail.text}
-                      </pre>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -505,5 +507,3 @@ export default function Inbox({ siteTitle, user }) {
     </Layout>
   );
 }
-
-

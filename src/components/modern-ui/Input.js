@@ -1,4 +1,7 @@
+'use client';
+
 import React from 'react';
+import { Input as ShadcnInput } from '../ui/input';
 
 export const Input = ({
   label,
@@ -8,21 +11,23 @@ export const Input = ({
   placeholder,
   disabled,
   className = '',
+  ...props
 }) => {
   return (
     <div className="w-full">
       {label && (
-        <label className="block text-sm font-medium text-muted-foreground mb-1">
+        <label className="block text-sm font-medium text-muted-foreground mb-2">
           {label}
         </label>
       )}
-      <input
+      <ShadcnInput
         type={type}
         value={value}
-        onChange={e => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled}
-        className={`w-full px-3 py-2 border border-border rounded-md shadow-sm bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background focus:border-primary sm:text-sm disabled:bg-muted/60 disabled:text-muted-foreground ${className}`}
+        className={className}
+        {...props}
       />
     </div>
   );

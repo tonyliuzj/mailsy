@@ -1,36 +1,41 @@
+'use client';
+
 import React from 'react';
+import {
+  Card as ShadcnCard,
+  CardHeader as ShadcnCardHeader,
+  CardContent as ShadcnCardContent,
+  CardFooter as ShadcnCardFooter,
+} from '../ui/card';
 
 export function Card({ children, className = '', ...props }) {
   return (
-    <div
-      className={`bg-card text-card-foreground rounded-lg shadow-sm border border-border overflow-hidden ${className}`}
-      {...props}
-    >
+    <ShadcnCard className={className} {...props}>
       {children}
-    </div>
+    </ShadcnCard>
   );
 }
 
 export function CardHeader({ children, className = '', ...props }) {
   return (
-    <div className={`px-6 py-4 border-b border-border/80 ${className}`} {...props}>
+    <ShadcnCardHeader className={className} {...props}>
       {children}
-    </div>
+    </ShadcnCardHeader>
   );
 }
 
 export function CardContent({ children, className = '', ...props }) {
   return (
-    <div className={`p-6 ${className}`} {...props}>
+    <ShadcnCardContent className={className} {...props}>
       {children}
-    </div>
+    </ShadcnCardContent>
   );
 }
 
 export function CardFooter({ children, className = '', ...props }) {
   return (
-    <div className={`px-6 py-4 bg-muted text-muted-foreground border-t border-border/80 ${className}`} {...props}>
+    <ShadcnCardFooter className={className} {...props}>
       {children}
-    </div>
+    </ShadcnCardFooter>
   );
 }

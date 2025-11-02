@@ -1,20 +1,26 @@
+'use client';
+
 import React from 'react';
+import { Badge as ShadcnBadge } from '../ui/badge';
 
 export function Badge({ children, variant = 'default', className = '', ...props }) {
-  const baseClasses = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium';
-
-  const variants = {
-    default: 'bg-accent text-accent-foreground',
-    primary: 'bg-primary text-primary-foreground',
-    secondary: 'bg-muted text-foreground',
-    success: 'bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-200',
-    warning: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-500/20 dark:text-yellow-100',
-    error: 'bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-100',
+  // Map custom variants to shadcn variants
+  const variantMap = {
+    default: 'default',
+    primary: 'default',
+    secondary: 'secondary',
+    success: 'default',
+    warning: 'default',
+    error: 'destructive',
   };
 
   return (
-    <span className={`${baseClasses} ${variants[variant]} ${className}`} {...props}>
+    <ShadcnBadge
+      variant={variantMap[variant] || 'default'}
+      className={className}
+      {...props}
+    >
       {children}
-    </span>
+    </ShadcnBadge>
   );
 }
