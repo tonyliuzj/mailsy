@@ -281,4 +281,24 @@ export function getUserEmailByAddress(emailAddress) {
   };
 }
 
+export function getConfig() {
+  const rows = db.prepare('SELECT key, value FROM settings').all()
+  return rows.reduce((acc, row) => {
+    acc[row.key] = row.value
+    return acc
+  }, {})
+}
+
+export function updateConfig(config) {
+  const stmt = db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)')
+  const update = db.transaction((cfg) => {
+    for (const [key, value] of Object.entries(cfg)) {
+      stmt.run(key, String(value))
+    }
+  })
+  update(config)
+}
+
+export const createUserSession = createSession
+
 export { db }

@@ -1,4 +1,4 @@
-import { createEmailOnlyUser, createUserEmail, getFirstActiveDomain } from '../../lib/db.js'
+import { createEmail, getFirstActiveDomain } from '../../lib/db.js'
 import { createSessionCookie } from '../../lib/user-session.js'
 import { generate as randomWords } from 'random-words'
 import { nanoid } from 'nanoid'
@@ -33,7 +33,7 @@ const {
         return res.status(400).json({ error: 'Turnstile verification is required' })
       }
 
-      const verification = await verifyTurnstileToken(turnstileToken, getClientIp(req))
+    const verification = await verifyTurnstileToken(turnstileToken, getClientIp(req))
       if (!verification.success) {
         const statusCode = verification.error && verification.error.includes('not configured') ? 500 : 400
         console.error('[create-email] Turnstile verification failed:', verification)
@@ -41,13 +41,6 @@ const {
       }
     }
 
-    
-    const userResult = createEmailOnlyUser()
-    if (!userResult.success) {
-      return res.status(500).json({ error: userResult.error })
-    }
-
-    
     let emailAddress
     if (emailType === 'random') {
       const randomAlias = randomWords({ exactly: 2, join: '.' })
@@ -62,21 +55,20 @@ const {
       return res.status(400).json({ error: 'Invalid email type' })
     }
 
-    
     const passkey = nanoid(16)
 
-    
-const emailResult = createUserEmail(userResult.userId, emailAddress, passkey, domainName)
+    const emailResult = createEmail(emailAddress, passkey, domainName)
     if (!emailResult.success) {
       return res.status(400).json({ error: emailResult.error })
     }
+    
+    // In the current DB schema, emailId serves as userId
+    const userId = emailResult.emailId
 
-    
-    const session = createSessionCookie(userResult.userId)
-    
+    const session = createSessionCookie(userId)
     
     const { createUserSession } = await import('../../lib/db.js')
-    createUserSession(userResult.userId, session.token, session.expiresAt)
+    createUserSession(userId, session.token, session.expiresAt)
 
     
     res.setHeader('Set-Cookie', session.cookie)
