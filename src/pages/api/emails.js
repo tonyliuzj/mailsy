@@ -44,6 +44,7 @@ async function handler(req, res) {
     host: domain.imap_host,
     port: domain.imap_port,
     tls: domain.imap_tls,
+    tlsOptions: { rejectUnauthorized: false },
   }
 
   const imap = new Imap(imapConfig)
@@ -80,7 +81,7 @@ async function handler(req, res) {
       })
     })
 
-    imap.once('error', () => reject(new Error('A connection error occurred.')))
+    imap.once('error', (err) => reject(new Error(`A connection error occurred: ${err.message}`)))
     imap.connect()
   })
 
