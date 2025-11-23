@@ -4,7 +4,7 @@ A simple, modern disposable email web app built with Next.js, Tailwind CSS, and 
 
 ---
 
-## 🚀 Features
+## Features
 
 - **Disposable addresses**  
   Generate a random email like `autumn.river@example.com` and throw it away when you’re done.
@@ -29,7 +29,7 @@ A simple, modern disposable email web app built with Next.js, Tailwind CSS, and 
 
 ---
 
-## 🛠️ Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -72,7 +72,7 @@ yarn dev
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 All settings live in the SQLite `config` table (auto-created at `data/temp-mail.db`).  Use the **Admin → Settings** page to modify:
 
@@ -87,7 +87,7 @@ All settings live in the SQLite `config` table (auto-created at `data/temp-mail.
 | **Turnstile Site Key** | from Cloudflare Turnstile dashboard         |
 | **Turnstile Secret**   | from Cloudflare Turnstile dashboard         |
 
-👉 **Default admin**
+**Default admin**
 
 * Username: `admin`
 * Password: `changeme`
@@ -96,7 +96,7 @@ Be sure to **change your password** after first login.
 
 ---
 
-## 🎨 Project Structure
+## Project Structure
 
 ```
 pages/
@@ -126,7 +126,7 @@ styles/                  # global styles (if any)
 
 ---
 
-## 📱 Responsive & Accessible
+## Responsive & Accessible
 
 * **Mobile-friendly**: single-column on small screens, 1:2 ratio on desktop.
 * **Keyboard & focus-style** courtesy of default Tailwind resets.
@@ -134,7 +134,7 @@ styles/                  # global styles (if any)
 
 ---
 
-## 🚧 Deployment
+## Deployment
 
 * **Vercel**: zero-config for Next.js, just connect your repo.
 * **Custom**:
@@ -146,7 +146,7 @@ styles/                  # global styles (if any)
 
 ---
 
-## 🔒 Security
+## Security
 
 * **Session cookies** with `iron-session` protect admin routes.
 * **CAPTCHA** prevents abuse of address generation.
@@ -155,6 +155,6 @@ styles/                  # global styles (if any)
 
 ---
 
-## 📄 License
+## License
 
 This project is [MIT-licensed](./LICENSE). Feel free to fork and adapt!
