@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Input as ShadcnInput } from '../ui/input';
 import { Button } from '../ui/button';
+import { ChevronDown } from 'lucide-react';
 
 export function EmailInput({ 
   label, 
@@ -87,6 +88,7 @@ export function EmailInput({
               </option>
             ))}
           </select>
+          <ChevronDown className="absolute right-2 top-2.5 h-4 w-4 opacity-50 pointer-events-none z-30" />
         </div>
         {onRandom && (
           <Button

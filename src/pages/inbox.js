@@ -497,7 +497,7 @@ export default function Inbox({ siteTitle, user }) {
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex items-start gap-4 min-w-0 flex-1">
                               <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-primary font-bold text-sm ring-2 ring-background shadow-sm">
-                                {email.from.charAt(0).toUpperCase()}
+                                {email.from.replace(/^["']/, '').charAt(0).toUpperCase()}
                               </div>
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-center justify-between mb-1">

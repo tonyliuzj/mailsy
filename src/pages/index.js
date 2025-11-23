@@ -8,6 +8,7 @@ import { LoadingSpinner } from '../components/modern-ui/LoadingSpinner';
 import { Layout } from '../components/modern-ui/Layout';
 import { EmailInput } from '../components/modern-ui/EmailInput';
 import { Input } from '../components/modern-ui/Input';
+import { Badge } from '../components/modern-ui/Badge';
 import { withUser } from '../lib/user-auth';
 
 export const getServerSideProps = withUser(async ({ user }) => {
@@ -354,150 +355,178 @@ export default function Home({
   return (
     <Layout siteTitle={siteTitle}>
       <div className="flex justify-center items-center min-h-screen p-4">
-        <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500">
-          <Card className="h-fit backdrop-blur-sm bg-card/95 border-primary/10 shadow-2xl">
-            <CardHeader className="pb-6">
-              <div className="bg-muted/50 p-1 rounded-lg flex relative">
-                <div
-                  className={`absolute inset-y-1 w-[calc(50%-4px)] bg-background shadow-sm rounded-md transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
-                    isLoginView ? 'translate-x-[calc(100%+4px)]' : 'translate-x-1'
-                  }`}
-                />
-                <button
-                  onClick={() => setIsLoginView(false)}
-                  className={`flex-1 relative z-10 py-2 text-sm font-medium rounded-md transition-colors duration-300 ${
-                    !isLoginView ? 'text-foreground' : 'text-muted-foreground hover:text-foreground/80'
-                  }`}
-                >
-                  Create Account
-                </button>
-                <button
-                  onClick={() => setIsLoginView(true)}
-                  className={`flex-1 relative z-10 py-2 text-sm font-medium rounded-md transition-colors duration-300 ${
-                    isLoginView ? 'text-foreground' : 'text-muted-foreground hover:text-foreground/80'
-                  }`}
-                >
-                  Login
-                </button>
-              </div>
-            </CardHeader>
-            
-            <CardContent className="space-y-6">
-              {isLoginView ? (
-                <>
-                  <div className="text-center">
-                    <h2 className="text-2xl font-bold text-foreground transition-colors">
-                      Login to Your Account
-                    </h2>
-                    <p className="text-sm text-muted-foreground transition-colors">
-                      Enter your credentials to access your account.
-                    </p>
-                  </div>
-                  <div className="space-y-4">
-                    <Input
-                      label="Email Address"
-                      type="email"
-                      value={loginEmail}
-                      onChange={setLoginEmail}
-                      placeholder="you@example.com"
-                      disabled={isLoading}
-                    />
-                    <Input
-                      label="Passkey"
-                      type="password"
-                      value={loginPasskey}
-                      onChange={setLoginPasskey}
-                      placeholder="Your passkey"
-                      disabled={isLoading}
-                    />
-                    {turnstileLoginEnabled && turnstileSiteKey && (
-                      <div className="flex justify-center">
-                        <div ref={loginContainerRef} className="cf-turnstile" />
-                      </div>
-                    )}
-                    {error && (
-                      <div className="bg-red-50 border border-red-200 dark:bg-red-500/10 dark:border-red-400/40 rounded-md p-3">
-                        <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
-                      </div>
-                    )}
-                    <Button
-                      onClick={handleLogin}
-                      disabled={
-                        !loginEmail ||
-                        !loginPasskey ||
-                        isLoading ||
-                        (turnstileLoginEnabled && turnstileSiteKey && !loginToken)
-                      }
-                      className="w-full"
-                      size="lg"
-                    >
-                      {isLoading ? (
-                        <div className="flex items-center justify-center">
-                          <LoadingSpinner size="sm" className="mr-2" />
-                          Logging in...
+        <div className="flex flex-col md:flex-row gap-6 w-full max-w-5xl items-start justify-center animate-in fade-in zoom-in-95 duration-500">
+          <div className="w-full max-w-md">
+            <Card className="h-fit backdrop-blur-sm bg-card/95 border-primary/10 shadow-2xl">
+              <CardHeader className="pb-6">
+                <div className="bg-muted/50 p-1 rounded-lg flex relative">
+                  <div
+                    className={`absolute inset-y-1 w-[calc(50%-4px)] bg-background shadow-sm rounded-md transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
+                      isLoginView ? 'translate-x-[calc(100%+4px)]' : 'translate-x-1'
+                    }`}
+                  />
+                  <button
+                    onClick={() => setIsLoginView(false)}
+                    className={`flex-1 relative z-10 py-2 text-sm font-medium rounded-md transition-colors duration-300 ${
+                      !isLoginView ? 'text-foreground' : 'text-muted-foreground hover:text-foreground/80'
+                    }`}
+                  >
+                    Create Account
+                  </button>
+                  <button
+                    onClick={() => setIsLoginView(true)}
+                    className={`flex-1 relative z-10 py-2 text-sm font-medium rounded-md transition-colors duration-300 ${
+                      isLoginView ? 'text-foreground' : 'text-muted-foreground hover:text-foreground/80'
+                    }`}
+                  >
+                    Login
+                  </button>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="space-y-6">
+                {isLoginView ? (
+                  <>
+                    <div className="text-center">
+                      <h2 className="text-2xl font-bold text-foreground transition-colors">
+                        Login to Your Account
+                      </h2>
+                      <p className="text-sm text-muted-foreground transition-colors">
+                        Enter your credentials to access your account.
+                      </p>
+                    </div>
+                    <div className="space-y-4">
+                      <Input
+                        label="Email Address"
+                        type="email"
+                        value={loginEmail}
+                        onChange={setLoginEmail}
+                        placeholder="you@example.com"
+                        disabled={isLoading}
+                      />
+                      <Input
+                        label="Passkey"
+                        type="password"
+                        value={loginPasskey}
+                        onChange={setLoginPasskey}
+                        placeholder="Your passkey"
+                        disabled={isLoading}
+                      />
+                      {turnstileLoginEnabled && turnstileSiteKey && (
+                        <div className="flex justify-center">
+                          <div ref={loginContainerRef} className="cf-turnstile" />
                         </div>
-                      ) : (
-                        'Login'
                       )}
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="text-center">
-                    <h2 className="text-2xl font-bold text-foreground transition-colors">
-                      Create Email Address
-                    </h2>
-                    <p className="text-sm text-muted-foreground transition-colors">
-                      Create your persistent email address with login credentials
-                    </p>
-                  </div>
-                  <div className="space-y-4">
-                    <EmailInput
-                      label="Email Address"
-                      value={emailInput}
-                      onChange={setEmailInput}
-                      domains={domains}
-                      selectedDomain={selectedDomain}
-                      onDomainChange={setSelectedDomain}
-                      placeholder="your-email"
-                      disabled={isLoading || started}
-                      onRandom={handleRandomClick}
-                    />
-                    {turnstileRegistrationEnabled && turnstileSiteKey && (
-                      <div className="flex justify-center">
-                        <div ref={registerContainerRef} className="cf-turnstile" />
-                      </div>
-                    )}
-                    {error && (
-                      <div className="bg-red-50 border border-red-200 dark:bg-red-500/10 dark:border-red-400/40 rounded-md p-3">
-                        <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
-                      </div>
-                    )}
-                    <Button
-                      onClick={handleSubmit}
-                      disabled={
-                        (!emailInput || !selectedDomain || domains.length === 0) ||
-                        isLoading ||
-                        (turnstileRegistrationEnabled && turnstileSiteKey && !registerToken)
-                      }
-                      className="w-full"
-                      size="lg"
-                    >
-                      {isLoading ? (
-                        <div className="flex items-center justify-center">
-                          <LoadingSpinner size="sm" className="mr-2" />
-                          Creating...
+                      {error && (
+                        <div className="bg-red-50 border border-red-200 dark:bg-red-500/10 dark:border-red-400/40 rounded-md p-3">
+                          <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
                         </div>
-                      ) : (
-                        'Create Account'
                       )}
-                    </Button>
+                      <Button
+                        onClick={handleLogin}
+                        disabled={
+                          !loginEmail ||
+                          !loginPasskey ||
+                          isLoading ||
+                          (turnstileLoginEnabled && turnstileSiteKey && !loginToken)
+                        }
+                        className="w-full"
+                        size="lg"
+                      >
+                        {isLoading ? (
+                          <div className="flex items-center justify-center">
+                            <LoadingSpinner size="sm" className="mr-2" />
+                            Logging in...
+                          </div>
+                        ) : (
+                          'Login'
+                        )}
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-center">
+                      <h2 className="text-2xl font-bold text-foreground transition-colors">
+                        Create Email Address
+                      </h2>
+                      <p className="text-sm text-muted-foreground transition-colors">
+                        Create your persistent email address with login credentials
+                      </p>
+                    </div>
+                    <div className="space-y-4">
+                      <EmailInput
+                        label="Email Address"
+                        value={emailInput}
+                        onChange={setEmailInput}
+                        domains={domains}
+                        selectedDomain={selectedDomain}
+                        onDomainChange={setSelectedDomain}
+                        placeholder="your-email"
+                        disabled={isLoading || started}
+                        onRandom={handleRandomClick}
+                      />
+                      {turnstileRegistrationEnabled && turnstileSiteKey && (
+                        <div className="flex justify-center">
+                          <div ref={registerContainerRef} className="cf-turnstile" />
+                        </div>
+                      )}
+                      {error && (
+                        <div className="bg-red-50 border border-red-200 dark:bg-red-500/10 dark:border-red-400/40 rounded-md p-3">
+                          <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
+                        </div>
+                      )}
+                      <Button
+                        onClick={handleSubmit}
+                        disabled={
+                          (!emailInput || !selectedDomain || domains.length === 0) ||
+                          isLoading ||
+                          (turnstileRegistrationEnabled && turnstileSiteKey && !registerToken)
+                        }
+                        className="w-full"
+                        size="lg"
+                      >
+                        {isLoading ? (
+                          <div className="flex items-center justify-center">
+                            <LoadingSpinner size="sm" className="mr-2" />
+                            Creating...
+                          </div>
+                        ) : (
+                          'Create Account'
+                        )}
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {!isLoginView && domains.length > 0 && (
+            <div className="w-full max-w-md md:max-w-xs animate-in slide-in-from-right-4 duration-500 delay-150">
+              <Card className="backdrop-blur-sm bg-card/80 border-primary/10 shadow-xl">
+                <CardHeader className="pb-3 bg-muted/30">
+                  <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">
+                    Available Domains
+                  </h3>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  <div className="flex flex-wrap gap-2">
+                    {domains.map(domain => (
+                      <Badge 
+                        key={domain.id} 
+                        variant="secondary" 
+                        className="font-mono text-xs cursor-pointer hover:bg-primary/20 transition-colors"
+                        onClick={() => setSelectedDomain(domain.name)}
+                      >
+                        @{domain.name}
+                      </Badge>
+                    ))}
                   </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       </div>
     </Layout>
