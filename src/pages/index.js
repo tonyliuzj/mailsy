@@ -310,9 +310,9 @@ export default function Home({
   if (user) {
     return (
       <Layout siteTitle={siteTitle}>
-        <div className="flex justify-center items-center min-h-screen">
-          <div className="w-full max-w-md">
-            <Card className="h-fit">
+        <div className="flex justify-center items-center min-h-screen p-4">
+          <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500">
+            <Card className="h-fit backdrop-blur-sm bg-card/95 border-primary/10 shadow-2xl">
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-2xl font-bold text-foreground transition-colors">
@@ -353,20 +353,29 @@ export default function Home({
 
   return (
     <Layout siteTitle={siteTitle}>
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="w-full max-w-md">
-          <Card className="h-fit">
-            <CardHeader className="pb-4">
-              <div className="flex border-b">
+      <div className="flex justify-center items-center min-h-screen p-4">
+        <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500">
+          <Card className="h-fit backdrop-blur-sm bg-card/95 border-primary/10 shadow-2xl">
+            <CardHeader className="pb-6">
+              <div className="bg-muted/50 p-1 rounded-lg flex relative">
+                <div
+                  className={`absolute inset-y-1 w-[calc(50%-4px)] bg-background shadow-sm rounded-md transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
+                    isLoginView ? 'translate-x-[calc(100%+4px)]' : 'translate-x-1'
+                  }`}
+                />
                 <button
                   onClick={() => setIsLoginView(false)}
-                  className={`flex-1 py-2 text-center font-medium border-b-2 transition-colors ${!isLoginView ? 'border-primary text-primary' : 'border-transparent text-muted-foreground'}`}
+                  className={`flex-1 relative z-10 py-2 text-sm font-medium rounded-md transition-colors duration-300 ${
+                    !isLoginView ? 'text-foreground' : 'text-muted-foreground hover:text-foreground/80'
+                  }`}
                 >
                   Create Account
                 </button>
                 <button
                   onClick={() => setIsLoginView(true)}
-                  className={`flex-1 py-2 text-center font-medium border-b-2 transition-colors ${isLoginView ? 'border-primary text-primary' : 'border-transparent text-muted-foreground'}`}
+                  className={`flex-1 relative z-10 py-2 text-sm font-medium rounded-md transition-colors duration-300 ${
+                    isLoginView ? 'text-foreground' : 'text-muted-foreground hover:text-foreground/80'
+                  }`}
                 >
                   Login
                 </button>

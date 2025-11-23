@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
+import { Copy, Eye, EyeOff, RefreshCw, LogOut, Inbox as InboxIcon, ArrowLeft, User, Mail, Calendar, Clock } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '../components/modern-ui/Card';
 import { Button } from '../components/modern-ui/Button';
 import { Badge } from '../components/modern-ui/Badge';
@@ -297,210 +298,243 @@ export default function Inbox({ siteTitle, user }) {
 
   return (
     <Layout siteTitle={siteTitle} user={user}>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start p-6">
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <h3 className="text-lg font-semibold">Account Details</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start p-4 lg:p-8 max-w-7xl mx-auto">
+        {/* Sidebar */}
+        <div className="lg:col-span-4 xl:col-span-3 space-y-6">
+          <Card className="overflow-hidden border-none shadow-lg bg-card/50 backdrop-blur-sm">
+            <CardHeader className="bg-primary/5 border-b border-primary/10 pb-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <User className="w-4 h-4 text-primary" />
+                Account Details
+              </h3>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               {success && (
-                <div className="bg-green-100 border border-green-200 dark:bg-green-500/15 dark:border-green-500/40 rounded-md p-3 mb-4 transition-colors">
-                  <p className="text-sm font-medium text-green-950 dark:text-green-200">{success}</p>
+                <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 rounded-lg p-3 mb-4 text-sm animate-in slide-in-from-top-2">
+                  {success}
                 </div>
               )}
               {error && (
-                <div className="bg-red-50 border border-red-200 dark:bg-red-500/10 dark:border-red-400/40 rounded-md p-3 mb-4 transition-colors">
-                  <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
+                <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-lg p-3 mb-4 text-sm animate-in slide-in-from-top-2">
+                  {error}
                 </div>
               )}
+              
               {userEmails.map(email => (
-                <div key={email.id} className="border-b last:border-b-0 py-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium">{email.email_address}</h4>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyToClipboard(email.email_address, email.id, 'email')}
-                    >
-                      {copyFeedback[`${email.id}-email`] ? 'Copied!' : 'Copy'}
-                    </Button>
-                  </div>
-                  <div className="text-sm text-muted-foreground mt-1 transition-colors">
-                    Domain: @{email.domain_name} | Created: {formatDate(email.created_at)}
-                  </div>
-                  <div className="mt-4">
-                    <div className="flex items-center justify-between">
-                      <label className="text-sm font-medium text-muted-foreground">Passkey:</label>
-                    </div>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <code
-                        className={`flex-1 text-xs p-2 rounded transition-colors ${
-                        firstTimeUsers.has(email.id)
-                          ? 'bg-blue-100 border-2 border-blue-200 text-blue-900 dark:bg-blue-500/10 dark:border-blue-400/40 dark:text-blue-100'
-                          : newlyGeneratedPasskeys.has(email.id) 
-                            ? 'bg-green-100 border-2 border-green-200 text-green-900 dark:bg-green-500/20 dark:border-green-400/40 dark:text-green-100' 
-                            : 'bg-muted'
-                      }`}
+                <div key={email.id} className="space-y-6">
+                  <div className="space-y-1">
+                    <label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Email Address</label>
+                    <div className="group flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-border hover:border-primary/30 transition-all">
+                      <span className="font-mono text-sm truncate">{email.email_address}</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        onClick={() => copyToClipboard(email.email_address, email.id, 'email')}
                       >
-                        {email.passkey ? email.passkey : '***************'}
-                      </code>
+                        {copyFeedback[`${email.id}-email`] ? <span className="text-xs font-bold text-green-500">✓</span> : <Copy className="w-4 h-4" />}
+                      </Button>
+                    </div>
+                    <div className="flex justify-between text-xs text-muted-foreground px-1">
+                      <span>@{email.domain_name}</span>
+                      <span>{formatDate(email.created_at)}</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Passkey</label>
+                    <div className="group flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border hover:border-primary/30 transition-all">
+                      <div className="flex-1 font-mono text-sm overflow-hidden">
+                         {email.passkey ? (
+                           <span className={newlyGeneratedPasskeys.has(email.id) ? "text-green-600 dark:text-green-400 font-bold" : ""}>
+                             {email.passkey}
+                           </span>
+                         ) : (
+                           <span className="text-muted-foreground tracking-widest">••••••••••••</span>
+                         )}
+                      </div>
                       {email.passkey && (
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-foreground"
                           onClick={() => copyToClipboard(email.passkey, email.id, 'passkey')}
                         >
-                          {copyFeedback[`${email.id}-passkey`] ? 'Copied!' : 'Copy'}
+                          {copyFeedback[`${email.id}-passkey`] ? <span className="text-xs font-bold text-green-500">✓</span> : <Copy className="w-4 h-4" />}
                         </Button>
                       )}
                     </div>
-                    {firstTimeUsers.has(email.id) && (
-                    <p className="text-xs text-blue-700 mt-1">
-                        Welcome! Your passkey is visible. Click &quot;Mask Passkey&quot; when you&apos;re ready to hide it.
-                      </p>
-                    )}
-                    {newlyGeneratedPasskeys.has(email.id) && (
-                    <p className="text-xs text-green-700 mt-1">
-                        New passkey generated! Click &quot;Mask Passkey&quot; when you&apos;re ready to hide it.
-                      </p>
+                    
+                    {email.passkey ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full gap-2 text-muted-foreground hover:text-foreground"
+                        onClick={() => handleMaskPasskey(email.id)}
+                      >
+                        <EyeOff className="w-3 h-3" />
+                        Mask Passkey
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="w-full gap-2"
+                        onClick={() => handleRegeneratePasskey(email.id)}
+                        disabled={regeneratingId === email.id}
+                      >
+                        <RefreshCw className={`w-3 h-3 ${regeneratingId === email.id ? 'animate-spin' : ''}`} />
+                        {regeneratingId === email.id ? 'Regenerating...' : 'Regenerate Passkey'}
+                      </Button>
                     )}
                   </div>
-                  {(firstTimeUsers.has(email.id) || newlyGeneratedPasskeys.has(email.id)) ? (
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      className="mt-4 w-full"
-                      onClick={() => handleMaskPasskey(email.id)}
-                    >
-                      Mask Passkey
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="mt-4 w-full"
-                      onClick={() => handleRegeneratePasskey(email.id)}
-                      disabled={regeneratingId === email.id}
-                    >
-                      {regeneratingId === email.id ? 'Regenerating...' : 'Regenerate Passkey'}
-                    </Button>
-                  )}
                 </div>
               ))}
-              <Button
-                variant="secondary"
-                className="w-full mt-4"
-                onClick={handleLogout}
-              >
-                Logout
-              </Button>
+
+              <div className="pt-6 mt-6 border-t border-border">
+                <Button
+                  variant="ghost"
+                  className="w-full gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
-        <div className="lg:col-span-2">
-          <Card className="h-full">
-            <CardContent className="p-0 h-full flex flex-col">
-              {selectedEmail ? (
-                <div className="flex flex-col flex-1">
-                  <div className="border-b border-border transition-colors">
-                    <div className="p-6 pb-0">
-                      <Button
-                        variant="ghost"
-                        onClick={() => setSelectedEmail(null)}
-                        className="flex items-center text-muted-foreground mb-4"
-                      >
-                        {'\u2190'} Back to inbox
-                      </Button>
+
+        {/* Main Inbox Area */}
+        <div className="lg:col-span-8 xl:col-span-9 h-[calc(100vh-8rem)] min-h-[600px]">
+          <Card className="h-full border-none shadow-xl bg-card/80 backdrop-blur-md flex flex-col overflow-hidden">
+            {selectedEmail ? (
+              // Email Detail View
+              <div className="flex flex-col h-full animate-in slide-in-from-right-4 duration-300">
+                <div className="border-b border-border p-4 bg-muted/30">
+                  <div className="flex items-center gap-4 mb-4">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedEmail(null)}
+                      className="gap-2 pl-0 hover:pl-2 transition-all"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      Back to Inbox
+                    </Button>
+                  </div>
+                  <h2 className="text-2xl font-bold text-foreground mb-2 leading-tight">
+                    {selectedEmail.subject || '(No Subject)'}
+                  </h2>
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2 bg-background px-2 py-1 rounded-md border shadow-sm">
+                      <User className="w-3 h-3" />
+                      <span className="font-medium text-foreground">{selectedEmail.from}</span>
                     </div>
-                    <h2 className="text-xl font-semibold text-foreground mb-2 px-6">
-                      {selectedEmail.subject || '(no subject)'}
-                    </h2>
-                    <div className="flex items-center text-sm text-muted-foreground mb-4 px-6 pb-6">
-                      <span className="font-medium">{selectedEmail.from}</span>
-                      <span className="mx-2" aria-hidden="true">|</span>
-                      <span>{new Date(selectedEmail.date).toLocaleString()}</span>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-3 h-3" />
+                      <span>{new Date(selectedEmail.date).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-3 h-3" />
+                      <span>{new Date(selectedEmail.date).toLocaleTimeString()}</span>
                     </div>
                   </div>
-                  <div className="flex-1 overflow-y-auto p-6">
+                </div>
+                <div className="flex-1 overflow-y-auto p-6 bg-background/50">
+                  <div className="max-w-4xl mx-auto">
                     {selectedEmail.html ? (
                       <div
-                        className="prose prose-sm dark:prose-invert max-w-none w-full prose-headings:text-foreground prose-p:text-foreground prose-a:text-primary prose-strong:text-foreground prose-code:text-foreground prose-pre:bg-muted prose-pre:text-foreground prose-img:max-w-full prose-img:h-auto prose-table:w-full prose-table:table-auto prose-blockquote:border-l-2 prose-blockquote:pl-4 prose-ul:list-disc prose-ol:list-decimal overflow-hidden break-words"
+                        className="prose prose-zinc dark:prose-invert max-w-none
+                          prose-headings:font-bold prose-a:text-primary 
+                          prose-img:rounded-lg prose-img:shadow-md"
                         dangerouslySetInnerHTML={{ __html: selectedEmail.html }}
                       />
                     ) : (
-                      <div className="text-sm text-foreground whitespace-pre-wrap break-words font-mono bg-muted/50 p-4 rounded-md border border-border max-w-none w-full overflow-hidden">
+                      <div className="whitespace-pre-wrap font-mono text-sm bg-muted p-4 rounded-lg border">
                         {selectedEmail.text}
                       </div>
                     )}
                   </div>
                 </div>
-              ) : (
-                <div className="flex-1 overflow-hidden flex flex-col">
-                  <div className="p-6 border-b border-border transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <h3 className="text-lg font-semibold text-foreground">
-                          Inbox
-                        </h3>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        {isRefreshing ? (
-                          <LoadingSpinner size="sm" />
-                        ) : null}
-                        <span className="text-sm text-muted-foreground">
-                          {isRefreshing ? 'Checking...' : `Next check in ${countdown}s`}
-                        </span>
-                      </div>
+              </div>
+            ) : (
+              // Inbox List View
+              <div className="flex flex-col h-full">
+                <div className="p-4 border-b border-border flex items-center justify-between bg-muted/30">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <InboxIcon className="w-5 h-5 text-primary" />
                     </div>
-                    <Badge variant={inbox.length > 0 ? "secondary" : "outline"}>
-                      {inbox.length} email{inbox.length !== 1 ? 's' : ''}
-                    </Badge>
+                    <div>
+                      <h3 className="font-semibold text-lg">Inbox</h3>
+                      <p className="text-xs text-muted-foreground">
+                        {inbox.length} message{inbox.length !== 1 ? 's' : ''}
+                      </p>
+                    </div>
                   </div>
-                  
-                  <div className="flex-1 overflow-y-auto">
-                    {inbox.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                        <span className="text-4xl mb-4 opacity-50">{'\u2709'}</span>
-                        <p className="mt-4 text-lg font-medium">No messages yet</p>
-                        <p className="text-sm">
-                          Your inbox is empty. Emails will appear here when they arrive.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="divide-y divide-border/60 dark:divide-border/40 transition-colors">
-                        {inbox.map((email) => (
-                          <div
-                            key={email.uid}
-                            onClick={() => setSelectedEmail(email)}
-                            className="grid grid-cols-[auto_1fr_auto_3fr_auto_auto] items-start gap-4 p-4 hover:bg-muted/40 dark:hover:bg-muted/30 cursor-pointer transition-colors"
-                          >
-                            <div className="flex items-start">
-                              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-muted dark:bg-muted/60 transition-colors flex items-center justify-center">
-                                <span className="text-xs font-medium text-muted-foreground">
-                                  {email.from.charAt(0).toUpperCase()}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-sm font-medium text-foreground truncate">
-                                {email.subject || '(no subject)'}
-                              </p>
-                              <p className="text-sm text-muted-foreground truncate">
-                                {getSnippet(email.text)}
-                              </p>
-                            </div>
-                            <div className="text-right text-xs text-muted-foreground whitespace-nowrap">
-                              {formatDate(email.date)}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground bg-background px-3 py-1.5 rounded-full border shadow-sm">
+                      {isRefreshing ? (
+                        <RefreshCw className="w-3 h-3 animate-spin text-primary" />
+                      ) : (
+                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                      )}
+                      <span>{isRefreshing ? 'Syncing...' : `Auto-refresh in ${countdown}s`}</span>
+                    </div>
                   </div>
                 </div>
-              )}
-            </CardContent>
+                
+                <div className="flex-1 overflow-y-auto p-2 space-y-2 bg-muted/10">
+                  {inbox.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-muted-foreground p-8 text-center animate-in fade-in duration-500">
+                      <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-6">
+                        <InboxIcon className="w-12 h-12 opacity-20" />
+                      </div>
+                      <h4 className="text-xl font-semibold text-foreground mb-2">Your inbox is empty</h4>
+                      <p className="max-w-sm text-sm opacity-70">
+                        Messages will appear here automatically. No need to refresh the page.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {inbox.map((email, i) => (
+                        <div
+                          key={email.uid}
+                          onClick={() => setSelectedEmail(email)}
+                          className="group bg-background hover:bg-accent/50 p-4 rounded-xl border border-border/50 hover:border-primary/20 shadow-sm hover:shadow-md transition-all cursor-pointer animate-in slide-in-from-bottom-2 duration-300"
+                          style={{ animationDelay: `${i * 50}ms` }}
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-start gap-4 min-w-0 flex-1">
+                              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-primary font-bold text-sm ring-2 ring-background shadow-sm">
+                                {email.from.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="font-semibold text-foreground truncate pr-2">
+                                    {email.from}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">
+                                    {formatDate(email.date)}
+                                  </span>
+                                </div>
+                                <h4 className="text-sm font-medium text-foreground/90 truncate mb-1">
+                                  {email.subject || '(No Subject)'}
+                                </h4>
+                                <p className="text-xs text-muted-foreground truncate line-clamp-2 opacity-80">
+                                  {getSnippet(email.text)}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </Card>
         </div>
       </div>
