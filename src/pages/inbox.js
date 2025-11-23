@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/router';
-import { Copy, Eye, EyeOff, RefreshCw, LogOut, Inbox as InboxIcon, ArrowLeft, User, Mail, Calendar, Clock } from 'lucide-react';
+import { Copy, EyeOff, RefreshCw, LogOut, Inbox as InboxIcon, ArrowLeft, User, Calendar, Clock } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '../components/modern-ui/Card';
 import { Button } from '../components/modern-ui/Button';
-import { Badge } from '../components/modern-ui/Badge';
 import { LoadingSpinner } from '../components/modern-ui/LoadingSpinner';
 import { Layout } from '../components/modern-ui/Layout';
 import { withUser } from '../lib/user-auth';
@@ -43,7 +42,6 @@ export default function Inbox({ siteTitle, user }) {
   const [success, setSuccess] = useState('')
   const [regeneratingId, setRegeneratingId] = useState(null)
   const [newlyGeneratedPasskeys, setNewlyGeneratedPasskeys] = useState(new Set())
-  const [firstTimeUsers, setFirstTimeUsers] = useState(new Set())
   const [passkeyTimers, setPasskeyTimers] = useState({})
   const [copyFeedback, setCopyFeedback] = useState({})
 
@@ -60,7 +58,6 @@ export default function Inbox({ siteTitle, user }) {
           const storedPasskey = localStorage.getItem('passkey')
           if (storedPasskey && emails.length > 0) {
             // This is a newly created account, show the passkey unmasked permanently
-            const primaryEmail = emails[0]
             
             // Update the first email with the actual passkey
             const updatedEmails = emails.map((email, index) => 
@@ -70,7 +67,6 @@ export default function Inbox({ siteTitle, user }) {
             setUserEmails(updatedEmails)
             
             // Mark this as a first-time user (no timer, permanent unmasking)
-            setFirstTimeUsers(prev => new Set([...prev, primaryEmail.id]))
             setSuccess('Welcome! Your passkey is shown below. You can mask it manually when ready.')
             
             // Clear the localStorage to prevent showing on subsequent visits
@@ -185,13 +181,6 @@ export default function Inbox({ siteTitle, user }) {
           : email
       )
     )
-    
-    // Remove from first-time users set
-    setFirstTimeUsers(prev => {
-      const newSet = new Set(prev)
-      newSet.delete(emailId)
-      return newSet
-    })
     
     // Remove from newly generated passkeys set
     setNewlyGeneratedPasskeys(prev => {
