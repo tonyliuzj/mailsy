@@ -1,6 +1,10 @@
 import { useState } from 'react'
 import { useRouter } from 'next/router'
 import { withSessionSsr } from '../../lib/session'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/ui/card'
+import { Input } from '../../components/ui/input'
+import { Button } from '../../components/ui/button'
+import { Shield, AlertCircle } from 'lucide-react'
 
 export const getServerSideProps = withSessionSsr(async ({ req, params }) => {
   const { getAdminPath } = await import('../../lib/db')
@@ -24,60 +28,87 @@ export default function Login({ adminPath }) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
   const submit = async e => {
     e.preventDefault()
     setError('')
-    const res = await fetch(`/api/${adminPath}/login`, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ username, password }),
-    })
-    if (res.ok) router.push(`/${adminPath}`)
-    else {
-      const { error: msg } = await res.json()
-      setError(msg || 'Login failed')
+    setIsLoading(true)
+    try {
+      const res = await fetch(`/api/${adminPath}/login`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ username, password }),
+      })
+      if (res.ok) router.push(`/${adminPath}`)
+      else {
+        const { error: msg } = await res.json()
+        setError(msg || 'Login failed')
+        setIsLoading(false)
+      }
+    } catch (err) {
+      setError('An error occurred. Please try again.')
+      setIsLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background text-foreground px-4">
-      <form
-        onSubmit={submit}
-        className="w-full max-w-sm rounded-lg border border-border bg-card shadow-sm p-6 space-y-4"
-      >
-        <h1 className="text-xl font-bold">Admin Login</h1>
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <label className="block text-sm font-medium text-muted-foreground">
-          Username
-          <input
-            value={username}
-            onChange={e => setUsername(e.target.value)}
-            className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
-            autoFocus
-            autoComplete="username"
-            required
-          />
-        </label>
-        <label className="block text-sm font-medium text-muted-foreground">
-          Password
-          <input
-            type="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
-            autoComplete="current-password"
-            required
-          />
-        </label>
-        <button
-          type="submit"
-          className="w-full rounded-md bg-primary py-2 text-primary-foreground hover:bg-primary/90 transition-colors"
-        >
-          Login
-        </button>
-      </form>
+    <div className="min-h-screen flex items-center justify-center bg-muted/40 p-4">
+      <Card className="w-full max-w-sm shadow-lg">
+        <CardHeader className="space-y-1 items-center text-center">
+          <div className="bg-primary/10 p-3 rounded-full mb-2">
+            <Shield className="h-6 w-6 text-primary" />
+          </div>
+          <CardTitle className="text-2xl">Admin Login</CardTitle>
+          <CardDescription>
+            Enter your credentials to access the admin panel
+          </CardDescription>
+        </CardHeader>
+        <form onSubmit={submit}>
+          <CardContent className="space-y-4">
+            {error && (
+              <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                {error}
+              </div>
+            )}
+            <div className="space-y-2">
+              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="username">
+                Username
+              </label>
+              <Input
+                id="username"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                autoFocus
+                autoComplete="username"
+                required
+                placeholder="Enter username"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" htmlFor="password">
+                Password
+              </label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                autoComplete="current-password"
+                required
+                placeholder="Enter password"
+              />
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button className="w-full" type="submit" disabled={isLoading}>
+              {isLoading ? 'Logging in...' : 'Login'}
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
     </div>
   )
 }

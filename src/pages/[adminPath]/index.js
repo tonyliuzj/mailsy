@@ -1,6 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/router'
 import { withSessionSsr } from '../../lib/session'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/ui/card'
+import { Input } from '../../components/ui/input'
+import { Button } from '../../components/ui/button'
+import { Badge } from '../../components/ui/badge'
+import { 
+  LogOut, Key, User, Settings, Globe, ShieldCheck, 
+  Edit, Trash2, Plus, Save, X, Server, Lock 
+} from 'lucide-react'
 
 export const getServerSideProps = withSessionSsr(async ({ req, params }) => {
   const { getAdminPath } = await import('../../lib/db')
@@ -195,6 +203,8 @@ export default function AdminPage({ admin, adminPath }) {
 
   const editDomain = (domain) => {
     setDomainForm(domain)
+    // Scroll to form
+    document.getElementById('domain-form')?.scrollIntoView({ behavior: 'smooth' })
   }
 
   const deleteDomain = async (id) => {
@@ -214,304 +224,362 @@ export default function AdminPage({ admin, adminPath }) {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-4">
-      <div className="max-w-6xl mx-auto pt-6">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground">
-            Admin Panel {admin.username && <span className="text-muted-foreground text-lg font-normal ml-4">{admin.username}</span>}
-          </h1>
-          <button
-            onClick={logout}
-            className="text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded shadow transition"
-          >
-            Logout
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-card rounded-xl border border-border shadow-sm p-6">
-            <form onSubmit={changePwd} className="space-y-4">
-              <h2 className="text-xl font-semibold border-b pb-2 mb-3">Change Admin Password</h2>
-
-              <label className="block">
-                <span className="block font-medium">Current Password</span>
-                <input
-                  type="password"
-                  className="mt-1 block w-full border border-border rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary/40"
-                  value={pwd.current}
-                  onChange={e => setPwd({ ...pwd, current: e.target.value })}
-                />
-              </label>
-
-              <label className="block">
-                <span className="block font-medium">New Password</span>
-                <input
-                  type="password"
-                  className="mt-1 block w-full border border-border rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary/40"
-                  value={pwd.new}
-                  onChange={e => setPwd({ ...pwd, new: e.target.value })}
-                />
-              </label>
-
-              <button
-                type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md shadow"
-              >
-                Change Password
-              </button>
-              {pwdMsg && <p className="text-green-600 mt-2">{pwdMsg}</p>}
-            </form>
+    <div className="min-h-screen bg-muted/40 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Admin Panel</h1>
+            <p className="text-muted-foreground">Manage your Mailsy instance</p>
           </div>
-
-          <div className="bg-card rounded-xl border border-border shadow-sm p-6">
-            <form onSubmit={changeUsername} className="space-y-4">
-              <h2 className="text-xl font-semibold border-b pb-2 mb-3">Change Admin Username</h2>
-              <label className="block">
-                <span className="block font-medium">New Username</span>
-                <input
-                  type="text"
-                  className="mt-1 block w-full border border-border rounded-md"
-                  value={newUsername}
-                  onChange={e => setNewUsername(e.target.value)}
-                  minLength={3}
-                  required
-                />
-              </label>
-              <button
-                type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md shadow"
-              >
-                Change Username
-              </button>
-              {usernameMsg && <p className="text-green-600 mt-2">{usernameMsg}</p>}
-            </form>
-          </div>
-
-          <div className="bg-card rounded-xl border border-border shadow-sm p-6">
-            <form onSubmit={changeAdminPath} className="space-y-4">
-              <h2 className="text-xl font-semibold border-b pb-2 mb-3">Change Admin Path</h2>
-              <label className="block">
-                <span className="block font-medium">Current Path</span>
-                <input
-                  type="text"
-                  className="mt-1 block w-full border border-border rounded-md"
-                  value={newPath}
-                  onChange={e => setNewPath(e.target.value)}
-                  minLength={3}
-                  required
-                />
-              </label>
-              <button
-                type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md shadow"
-              >
-                Change Path
-              </button>
-              {pathMsg && <p className="text-green-600 mt-2">{pathMsg}</p>}
-            </form>
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-medium">Logged in as {admin.username}</span>
+            <Button variant="destructive" size="sm" onClick={logout} className="gap-2">
+              <LogOut className="h-4 w-4" /> Logout
+            </Button>
           </div>
         </div>
 
-        <div className="bg-card rounded-xl border border-border shadow-sm p-6 mt-6">
-          <form onSubmit={saveSiteTitle} className="space-y-4">
-            <h2 className="text-xl font-semibold border-b pb-2 mb-3">General Settings</h2>
-            
-            <label className="block">
-              <span className="block font-medium">Site Title</span>
-              <input
-                type="text"
-                className="mt-1 block w-full border border-border rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary/40"
-                value={siteTitle}
-                onChange={e => setSiteTitle(e.target.value)}
-              />
-            </label>
-            
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md shadow"
-            >
-              Save Site Title
-            </button>
-            {siteTitleMsg && <p className="text-green-600 mt-2">{siteTitleMsg}</p>}
-          </form>
-        </div>
-
-        <div className="bg-card rounded-xl border border-border shadow-sm p-6 mt-6">
-          <form onSubmit={saveTurnstileSettings} className="space-y-4">
-            <h2 className="text-xl font-semibold border-b pb-2 mb-3">Cloudflare Turnstile</h2>
-            <p className="text-sm text-muted-foreground">
-              Provide the site and secret keys from your Cloudflare dashboard and choose where Turnstile should be enforced.
-            </p>
-
-            <label className="block">
-              <span className="block font-medium">Site Key</span>
-              <input
-                type="text"
-                className="mt-1 block w-full border border-border rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary/40"
-                value={turnstileSettings.siteKey}
-                onChange={e => setTurnstileSettings(prev => ({ ...prev, siteKey: e.target.value }))}
-                placeholder="0x0000000000000000000000000000000AA"
-              />
-            </label>
-
-            <label className="block">
-              <span className="block font-medium">Secret Key</span>
-              <input
-                type="password"
-                className="mt-1 block w-full border border-border rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary/40"
-                value={turnstileSettings.secretKey}
-                onChange={e => setTurnstileSettings(prev => ({ ...prev, secretKey: e.target.value }))}
-                placeholder="0x0000000000000000000000000000000AA"
-              />
-            </label>
-
-            <div className="flex flex-col space-y-2">
-              <label className="inline-flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={turnstileSettings.registrationEnabled}
-                  onChange={e => setTurnstileSettings(prev => ({ ...prev, registrationEnabled: e.target.checked }))}
-                  className="rounded"
-                />
-                <span>Require Turnstile when creating an account</span>
-              </label>
-              <label className="inline-flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={turnstileSettings.loginEnabled}
-                  onChange={e => setTurnstileSettings(prev => ({ ...prev, loginEnabled: e.target.checked }))}
-                  className="rounded"
-                />
-                <span>Require Turnstile at login</span>
-              </label>
-            </div>
-
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md shadow"
-            >
-              Save Turnstile Settings
-            </button>
-            {turnstileMsg && <p className="text-green-600 mt-2">{turnstileMsg}</p>}
-          </form>
-        </div>
-
-        <div className="bg-card rounded-xl border border-border shadow-sm p-6 mt-6">
-          <form onSubmit={saveDomain} className="space-y-4">
-            <h2 className="text-xl font-semibold border-b pb-2 mb-3">Domain Management</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[
-                ['name', 'Domain Name', 'text'],
-                ['imap_host', 'IMAP Host', 'text'],
-                ['imap_port', 'IMAP Port', 'number'],
-                ['imap_user', 'IMAP User', 'text'],
-                ['imap_password', 'IMAP Password', 'password'],
-              ].map(([key, label, type]) => (
-                <label key={key} className="block">
-                  <span className="block font-medium">{label}</span>
-                  <input
-                    type={type}
-                    name={key}
-                    className="mt-1 block w-full border border-border rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary/40"
-                    value={domainForm[key] || ''}
-                    onChange={e => setDomainForm({ ...domainForm, [key]: e.target.value })}
+        {/* Admin Settings Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          
+          {/* Change Password */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Key className="h-5 w-5 text-primary" /> Change Password
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={changePwd} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Current Password</label>
+                  <Input
+                    type="password"
+                    value={pwd.current}
+                    onChange={e => setPwd({ ...pwd, current: e.target.value })}
                   />
-                </label>
-              ))}
-              
-              <label className="flex items-center space-x-2 col-span-2">
-                <input
-                  type="checkbox"
-                  name="imap_tls"
-                  checked={domainForm.imap_tls || false}
-                  onChange={e => setDomainForm({ ...domainForm, imap_tls: e.target.checked })}
-                  className="rounded"
-                />
-                <span className="font-medium">Use TLS</span>
-              </label>
-              
-              <label className="flex items-center space-x-2 col-span-2">
-                <input
-                  type="checkbox"
-                  name="is_active"
-                  checked={domainForm.is_active ?? true}
-                  onChange={e => setDomainForm({ ...domainForm, is_active: e.target.checked })}
-                  className="rounded"
-                />
-                <span className="font-medium">Active</span>
-              </label>
-            </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">New Password</label>
+                  <Input
+                    type="password"
+                    value={pwd.new}
+                    onChange={e => setPwd({ ...pwd, new: e.target.value })}
+                  />
+                </div>
+                <Button type="submit" className="w-full">Update Password</Button>
+                {pwdMsg && <p className={`text-sm ${pwdMsg.includes('Error') ? 'text-destructive' : 'text-green-600'}`}>{pwdMsg}</p>}
+              </form>
+            </CardContent>
+          </Card>
 
-            <input type="hidden" name="id" value={domainForm.id || ''} />
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md shadow"
-            >
-              {domainForm.id ? 'Update Domain' : 'Add Domain'}
-            </button>
-            {domainForm.id && (
-              <button
-                type="button"
-                onClick={() => {
-                  setDomainForm({});
-                  setDomainMsg('');
-                }}
-                className="bg-muted hover:bg-muted/80 text-foreground px-5 py-2 rounded-md shadow ml-2"
-              >
-                Cancel
-              </button>
-            )}
-            {domainMsg && <p className="text-green-600 mt-2">{domainMsg}</p>}
-          </form>
+          {/* Change Username */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <User className="h-5 w-5 text-primary" /> Change Username
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={changeUsername} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">New Username</label>
+                  <Input
+                    type="text"
+                    value={newUsername}
+                    onChange={e => setNewUsername(e.target.value)}
+                    minLength={3}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full">Update Username</Button>
+                {usernameMsg && <p className={`text-sm ${usernameMsg.includes('Failed') ? 'text-destructive' : 'text-green-600'}`}>{usernameMsg}</p>}
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* Change Admin Path */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Settings className="h-5 w-5 text-primary" /> Admin Path
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={changeAdminPath} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Path</label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground text-sm">/</span>
+                    <Input
+                      type="text"
+                      value={newPath}
+                      onChange={e => setNewPath(e.target.value)}
+                      minLength={3}
+                      required
+                    />
+                  </div>
+                </div>
+                <Button type="submit" className="w-full">Update Path</Button>
+                {pathMsg && <p className={`text-sm ${pathMsg.includes('Failed') ? 'text-destructive' : 'text-green-600'}`}>{pathMsg}</p>}
+              </form>
+            </CardContent>
+          </Card>
         </div>
 
-        {domains.length > 0 && (
-          <div className="bg-card rounded-xl border border-border shadow-sm p-6 mt-6">
-            <h2 className="text-xl font-semibold border-b pb-2 mb-3">Domains</h2>
-            <table className="min-w-full divide-y divide-border/60">
-              <thead className="bg-muted">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Domain</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">IMAP Host</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-card divide-y divide-border/60 dark:divide-border/40">
-                {domains.map(domain => (
-                  <tr key={domain.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">{domain.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{domain.imap_host}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        domain.is_active
-                          ? 'bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-100'
-                          : 'bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-100'
-                      }`}>
-                        {domain.is_active ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <button
-                        onClick={() => editDomain(domain)}
-                        className="text-blue-600 hover:text-blue-900 mr-3"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => deleteDomain(domain.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        {/* Global Settings Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          {/* General Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5 text-primary" /> General Settings
+              </CardTitle>
+              <CardDescription>Basic site configuration</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={saveSiteTitle} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Site Title</label>
+                  <Input
+                    type="text"
+                    value={siteTitle}
+                    onChange={e => setSiteTitle(e.target.value)}
+                    placeholder="My Email Service"
+                  />
+                </div>
+                <Button type="submit">Save Settings</Button>
+                {siteTitleMsg && <p className={`text-sm ${siteTitleMsg.includes('Error') ? 'text-destructive' : 'text-green-600'}`}>{siteTitleMsg}</p>}
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* Turnstile Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-primary" /> Cloudflare Turnstile
+              </CardTitle>
+              <CardDescription>Spam protection settings</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={saveTurnstileSettings} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Site Key</label>
+                    <Input
+                      type="text"
+                      value={turnstileSettings.siteKey}
+                      onChange={e => setTurnstileSettings(prev => ({ ...prev, siteKey: e.target.value }))}
+                      placeholder="0x4AAAA..."
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Secret Key</label>
+                    <Input
+                      type="password"
+                      value={turnstileSettings.secretKey}
+                      onChange={e => setTurnstileSettings(prev => ({ ...prev, secretKey: e.target.value }))}
+                      placeholder="0x4AAAA..."
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex flex-col gap-2 pt-2">
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={turnstileSettings.registrationEnabled}
+                      onChange={e => setTurnstileSettings(prev => ({ ...prev, registrationEnabled: e.target.checked }))}
+                      className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
+                    />
+                    <span className="text-sm">Require Turnstile for registration</span>
+                  </label>
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={turnstileSettings.loginEnabled}
+                      onChange={e => setTurnstileSettings(prev => ({ ...prev, loginEnabled: e.target.checked }))}
+                      className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
+                    />
+                    <span className="text-sm">Require Turnstile for login</span>
+                  </label>
+                </div>
+
+                <Button type="submit">Save Turnstile Settings</Button>
+                {turnstileMsg && <p className={`text-sm ${turnstileMsg.includes('Error') ? 'text-destructive' : 'text-green-600'}`}>{turnstileMsg}</p>}
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Domain Management */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* Domain Form */}
+          <Card className="lg:col-span-1" id="domain-form">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Server className="h-5 w-5 text-primary" /> 
+                {domainForm.id ? 'Edit Domain' : 'Add Domain'}
+              </CardTitle>
+              <CardDescription>
+                {domainForm.id ? 'Update domain details' : 'Configure a new email domain'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={saveDomain} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Domain Name</label>
+                  <Input
+                    name="name"
+                    value={domainForm.name || ''}
+                    onChange={e => setDomainForm({ ...domainForm, name: e.target.value })}
+                    placeholder="example.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">IMAP Host</label>
+                  <Input
+                    name="imap_host"
+                    value={domainForm.imap_host || ''}
+                    onChange={e => setDomainForm({ ...domainForm, imap_host: e.target.value })}
+                    placeholder="imap.example.com"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Port</label>
+                    <Input
+                      type="number"
+                      name="imap_port"
+                      value={domainForm.imap_port || ''}
+                      onChange={e => setDomainForm({ ...domainForm, imap_port: e.target.value })}
+                      placeholder="993"
+                    />
+                  </div>
+                  <div className="flex items-end pb-2">
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="imap_tls"
+                        checked={domainForm.imap_tls || false}
+                        onChange={e => setDomainForm({ ...domainForm, imap_tls: e.target.checked })}
+                        className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
+                      />
+                      <span className="text-sm font-medium">Use TLS</span>
+                    </label>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">IMAP User</label>
+                  <Input
+                    name="imap_user"
+                    value={domainForm.imap_user || ''}
+                    onChange={e => setDomainForm({ ...domainForm, imap_user: e.target.value })}
+                    placeholder="user@example.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">IMAP Password</label>
+                  <Input
+                    type="password"
+                    name="imap_password"
+                    value={domainForm.imap_password || ''}
+                    onChange={e => setDomainForm({ ...domainForm, imap_password: e.target.value })}
+                    placeholder="••••••••"
+                  />
+                </div>
+                
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="is_active"
+                    checked={domainForm.is_active ?? true}
+                    onChange={e => setDomainForm({ ...domainForm, is_active: e.target.checked })}
+                    className="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4"
+                  />
+                  <span className="text-sm font-medium">Active</span>
+                </label>
+
+                <div className="flex gap-2">
+                  <Button type="submit" className="flex-1">
+                    {domainForm.id ? <Save className="h-4 w-4 mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                    {domainForm.id ? 'Update' : 'Add'}
+                  </Button>
+                  {domainForm.id && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setDomainForm({});
+                        setDomainMsg('');
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                {domainMsg && <p className={`text-sm ${domainMsg.includes('Error') ? 'text-destructive' : 'text-green-600'}`}>{domainMsg}</p>}
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* Domain List */}
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>Domains</CardTitle>
+              <CardDescription>Managed email domains</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                {domains.length > 0 ? (
+                  <table className="w-full text-sm text-left">
+                    <thead className="text-xs text-muted-foreground uppercase bg-muted/50">
+                      <tr>
+                        <th className="px-4 py-3 rounded-tl-lg">Domain</th>
+                        <th className="px-4 py-3">IMAP Host</th>
+                        <th className="px-4 py-3">Status</th>
+                        <th className="px-4 py-3 rounded-tr-lg text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {domains.map((domain, index) => (
+                        <tr key={domain.id} className="border-b last:border-0 hover:bg-muted/50 transition-colors">
+                          <td className="px-4 py-3 font-medium">{domain.name}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{domain.imap_host}</td>
+                          <td className="px-4 py-3">
+                            <Badge variant={domain.is_active ? 'default' : 'destructive'}>
+                              {domain.is_active ? 'Active' : 'Inactive'}
+                            </Badge>
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button variant="ghost" size="icon" onClick={() => editDomain(domain)} title="Edit">
+                                <Edit className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                              </Button>
+                              <Button variant="ghost" size="icon" onClick={() => deleteDomain(domain.id)} title="Delete">
+                                <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No domains configured yet.
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
       </div>
     </div>
   )
