@@ -311,7 +311,7 @@ export default function Home({
   if (user) {
     return (
       <Layout siteTitle={siteTitle}>
-        <div className="flex justify-center items-center min-h-screen p-4">
+        <div className="flex-grow flex justify-center items-center p-4">
           <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500">
             <Card className="h-fit backdrop-blur-sm bg-card/95 border-primary/10 shadow-2xl">
               <CardHeader className="pb-4">
@@ -354,7 +354,7 @@ export default function Home({
 
   return (
     <Layout siteTitle={siteTitle}>
-      <div className="flex justify-center items-center min-h-screen p-4">
+      <div className="flex-grow flex justify-center items-center p-4">
         <div className="flex flex-col md:flex-row gap-6 w-full max-w-5xl items-start justify-center animate-in fade-in zoom-in-95 duration-500">
           <div className="w-full max-w-md">
             <Card className="h-fit backdrop-blur-sm bg-card/95 border-primary/10 shadow-2xl">

@@ -43,7 +43,7 @@ export function Layout({ children, siteTitle = 'Mailsy', user }) {
     'block px-3 py-2 rounded-md text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors';
 
   return (
-    <div className={`min-h-screen bg-background text-foreground transition-colors ${darkMode ? 'dark' : ''}`}>
+    <div className={`min-h-screen flex flex-col bg-background text-foreground transition-colors ${darkMode ? 'dark' : ''}`}>
       <nav className="bg-card/80 backdrop-blur shadow-sm border-b border-border transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
@@ -123,7 +123,7 @@ export function Layout({ children, siteTitle = 'Mailsy', user }) {
         )}
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 transition-colors">{children}</main>
+      <main className="flex-grow flex flex-col w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 transition-colors">{children}</main>
 
       <footer className="bg-card border-t border-border py-8 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -278,7 +278,7 @@ export default function Inbox({ siteTitle, user }) {
   if (loading) {
     return (
       <Layout siteTitle={siteTitle} user={user}>
-        <div className="flex justify-center items-center min-h-screen">
+        <div className="flex-grow flex justify-center items-center h-full">
           <LoadingSpinner />
         </div>
       </Layout>
