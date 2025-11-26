@@ -47,7 +47,7 @@ export default function Login({ adminPath }) {
         setError(msg || 'Login failed')
         setIsLoading(false)
       }
-    } catch (err) {
+    } catch {
       setError('An error occurred. Please try again.')
       setIsLoading(false)
     }

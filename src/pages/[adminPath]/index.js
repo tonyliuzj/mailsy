@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/router'
 import { withSessionSsr } from '../../lib/session'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card'
 import { Input } from '../../components/ui/input'
 import { Button } from '../../components/ui/button'
 import { Badge } from '../../components/ui/badge'
-import { 
-  LogOut, Key, User, Settings, Globe, ShieldCheck, 
-  Edit, Trash2, Plus, Save, X, Server, Lock 
+import {
+  LogOut, Key, User, Settings, Globe, ShieldCheck,
+  Edit, Trash2, Plus, Save, X, Server
 } from 'lucide-react'
 
 export const getServerSideProps = withSessionSsr(async ({ req, params }) => {
@@ -547,7 +547,7 @@ export default function AdminPage({ admin, adminPath }) {
                       </tr>
                     </thead>
                     <tbody>
-                      {domains.map((domain, index) => (
+                      {domains.map((domain) => (
                         <tr key={domain.id} className="border-b last:border-0 hover:bg-muted/50 transition-colors">
                           <td className="px-4 py-3 font-medium">{domain.name}</td>
                           <td className="px-4 py-3 text-muted-foreground">{domain.imap_host}</td>
