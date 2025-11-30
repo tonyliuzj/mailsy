@@ -23,12 +23,10 @@ show_menu() {
 install_mailsy() {
   echo "Starting Mailsy Installation..."
 
-  # 1. System dependencies
   echo "Installing system dependencies..."
   sudo apt update
   sudo apt install -y git curl sqlite3 build-essential
 
-  # 2. Node.js: Must be at least v18, but install 22 if not installed at all
   echo "Checking Node.js version..."
   if command -v node >/dev/null 2>&1; then
     VERSION=$(node -v | sed 's/^v//')
@@ -53,7 +51,6 @@ install_mailsy() {
     sudo apt install -y nodejs
   fi
 
-  # 3. PM2
   echo "Checking for PM2..."
   if command -v pm2 >/dev/null 2>&1; then
     echo "PM2 is already installed. Skipping installation."
@@ -63,7 +60,6 @@ install_mailsy() {
   fi
 
 
-  # 4. Clone repo
   if [ -d "$INSTALL_DIR" ]; then
     if [ -d "$INSTALL_DIR/.git" ]; then
       echo "Repository already exists. Pulling latest changes..."
@@ -80,44 +76,32 @@ install_mailsy() {
     cd "$INSTALL_DIR"
   fi
 
-  # 5. TypeScript
   echo "Installing TypeScript..."
   npm install -g typescript
 
-  # 6. Env vars
   echo "Configuring environment variables..."
-  read -p "Cloudflare Turnstile site key: " SITE_KEY
-  read -p "Cloudflare Turnstile secret key: " SECRET_KEY
-  read -s -p "Session password (min 32 characters): " SESSION_PASS
-  echo ""
-  while [ ${#SESSION_PASS} -lt 32 ]; do
-    echo "Session password must be at least 32 characters"
-    read -s -p "Please enter a session password (min 32 characters): " SESSION_PASS
-    echo ""
-  done
+
+  echo "Generating secure session password..."
+  SESSION_PASS=$(openssl rand -base64 48 | tr -d '\n')
+
   read -p "Port to serve the app on (default 3000): " APP_PORT
   APP_PORT=${APP_PORT:-3000}
 
   cat > .env.local <<EOF
-NEXT_PUBLIC_TURNSTILE_SITEKEY=$SITE_KEY
-TURNSTILE_SECRET=$SECRET_KEY
-
 SESSION_PASSWORD=$SESSION_PASS
 
 PORT=$APP_PORT
 EOF
 
   echo ".env.local created"
+  echo "Note: Configure Cloudflare Turnstile in the admin settings panel after installation"
 
-  # 7. Project deps
   echo "Installing project dependencies..."
   npm install
 
-  # 8. Build
   echo "Building the app..."
   npm run build
 
-  # 9. Start PM2
   echo "Starting Mailsy under PM2 on port $APP_PORT..."
   pm2 start "npm run start -- -p $APP_PORT" --name "mailsy"
   pm2 save
