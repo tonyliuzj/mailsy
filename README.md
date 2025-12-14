@@ -50,7 +50,7 @@ A modern, self-hosted email service built with Next.js, Tailwind CSS, and SQLite
 #### Quick Install (One-Click Script)
 
 ```bash
-curl -sSL https://github.com/tonyliuzj/Mailsy/releases/latest/download/mailsy.sh -o mailsy.sh && chmod +x mailsy.sh && bash mailsy.sh
+curl -sSL https://github.com/tonyliuzj/mailsy/releases/latest/download/mailsy.sh -o mailsy.sh && chmod +x mailsy.sh && bash mailsy.sh
 ```
 
 #### Manual Installation
