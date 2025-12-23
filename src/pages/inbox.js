@@ -287,17 +287,17 @@ export default function Inbox({ siteTitle, user }) {
 
   return (
     <Layout siteTitle={siteTitle} user={user}>
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start p-4 lg:p-8 max-w-7xl mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start p-2 sm:p-4 lg:p-8 max-w-7xl mx-auto">
         {/* Sidebar */}
-        <div className="lg:col-span-4 xl:col-span-3 space-y-6">
+        <div className="lg:col-span-4 xl:col-span-3 space-y-4 lg:space-y-6">
           <Card className="overflow-hidden border-none shadow-lg bg-card/50 backdrop-blur-sm">
-            <CardHeader className="bg-primary/5 border-b border-primary/10 pb-4">
-              <h3 className="text-lg font-semibold flex items-center gap-2">
+            <CardHeader className="bg-primary/5 border-b border-primary/10 pb-3 sm:pb-4 px-4 sm:px-6">
+              <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
                 <User className="w-4 h-4 text-primary" />
                 Account Details
               </h3>
             </CardHeader>
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 sm:pt-6 px-4 sm:px-6">
               {success && (
                 <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 rounded-lg p-3 mb-4 text-sm animate-in slide-in-from-top-2">
                   {success}
@@ -310,30 +310,30 @@ export default function Inbox({ siteTitle, user }) {
               )}
               
               {userEmails.map(email => (
-                <div key={email.id} className="space-y-6">
+                <div key={email.id} className="space-y-4 sm:space-y-6">
                   <div className="space-y-1">
                     <label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Email Address</label>
                     <div className="group flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-border hover:border-primary/30 transition-all">
-                      <span className="font-mono text-sm truncate">{email.email_address}</span>
+                      <span className="font-mono text-xs sm:text-sm truncate mr-2">{email.email_address}</span>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground flex-shrink-0"
                         onClick={() => copyToClipboard(email.email_address, email.id, 'email')}
                       >
                         {copyFeedback[`${email.id}-email`] ? <span className="text-xs font-bold text-green-500">✓</span> : <Copy className="w-4 h-4" />}
                       </Button>
                     </div>
                     <div className="flex justify-between text-xs text-muted-foreground px-1">
-                      <span>@{email.domain_name}</span>
-                      <span>{formatDate(email.created_at)}</span>
+                      <span className="truncate mr-2">@{email.domain_name}</span>
+                      <span className="flex-shrink-0">{formatDate(email.created_at)}</span>
                     </div>
                   </div>
 
                   <div className="space-y-1">
                     <label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Passkey</label>
                     <div className="group flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border hover:border-primary/30 transition-all">
-                      <div className="flex-1 font-mono text-sm overflow-hidden">
+                      <div className="flex-1 font-mono text-xs sm:text-sm overflow-hidden break-all">
                          {email.passkey ? (
                            <span className={newlyGeneratedPasskeys.has(email.id) ? "text-green-600 dark:text-green-400 font-bold" : ""}>
                              {email.passkey}
@@ -395,42 +395,42 @@ export default function Inbox({ siteTitle, user }) {
         </div>
 
         {/* Main Inbox Area */}
-        <div className="lg:col-span-8 xl:col-span-9 h-[calc(100vh-8rem)] min-h-[600px]">
-          <Card className="h-full border-none shadow-xl bg-card/80 backdrop-blur-md flex flex-col overflow-hidden">
+        <div className="lg:col-span-8 xl:col-span-9 lg:h-[calc(100vh-8rem)] min-h-[400px] sm:min-h-[600px]">
+          <Card className="lg:h-full border-none shadow-xl bg-card/80 backdrop-blur-md flex flex-col lg:overflow-hidden">
             {selectedEmail ? (
               // Email Detail View
-              <div className="flex flex-col h-full animate-in slide-in-from-right-4 duration-300">
-                <div className="border-b border-border p-4 bg-muted/30">
-                  <div className="flex items-center gap-4 mb-4">
+              <div className="flex flex-col lg:h-full animate-in slide-in-from-right-4 duration-300">
+                <div className="border-b border-border p-3 sm:p-4 bg-muted/30">
+                  <div className="flex items-center gap-2 sm:gap-4 mb-3 sm:mb-4">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => setSelectedEmail(null)}
-                      className="gap-2 pl-0 hover:pl-2 transition-all"
+                      className="gap-2 pl-0 hover:pl-2 transition-all text-xs sm:text-sm"
                     >
-                      <ArrowLeft className="w-4 h-4" />
+                      <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4" />
                       Back to Inbox
                     </Button>
                   </div>
-                  <h2 className="text-2xl font-bold text-foreground mb-2 leading-tight">
+                  <h2 className="text-lg sm:text-2xl font-bold text-foreground mb-2 leading-tight break-words">
                     {selectedEmail.subject || '(No Subject)'}
                   </h2>
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                     <div className="flex items-center gap-2 bg-background px-2 py-1 rounded-md border shadow-sm">
-                      <User className="w-3 h-3" />
-                      <span className="font-medium text-foreground">{selectedEmail.from}</span>
+                      <User className="w-3 h-3 flex-shrink-0" />
+                      <span className="font-medium text-foreground truncate max-w-[150px] sm:max-w-none">{selectedEmail.from}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Calendar className="w-3 h-3" />
+                      <Calendar className="w-3 h-3 flex-shrink-0" />
                       <span>{new Date(selectedEmail.date).toLocaleDateString()}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Clock className="w-3 h-3" />
+                      <Clock className="w-3 h-3 flex-shrink-0" />
                       <span>{new Date(selectedEmail.date).toLocaleTimeString()}</span>
                     </div>
                   </div>
                 </div>
-                <div className="flex-1 overflow-y-auto p-6 bg-background/50">
+                <div className="flex-1 lg:overflow-y-auto p-3 sm:p-6 bg-background/50">
                   <div className="max-w-4xl mx-auto">
                     {selectedEmail.html ? (
                       <div
@@ -450,26 +450,26 @@ export default function Inbox({ siteTitle, user }) {
             ) : (
               // Inbox List View
               <div className="flex flex-col h-full">
-                <div className="p-4 border-b border-border flex items-center justify-between bg-muted/30">
+                <div className="p-3 sm:p-4 border-b border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-muted/30">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-primary/10 rounded-lg">
-                      <InboxIcon className="w-5 h-5 text-primary" />
+                      <InboxIcon className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-lg">Inbox</h3>
+                      <h3 className="font-semibold text-base sm:text-lg">Inbox</h3>
                       <p className="text-xs text-muted-foreground">
                         {inbox.length} message{inbox.length !== 1 ? 's' : ''}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 w-full sm:w-auto">
                     <div className="flex items-center gap-2 text-xs text-muted-foreground bg-background px-3 py-1.5 rounded-full border shadow-sm">
                       {isRefreshing ? (
                         <RefreshCw className="w-3 h-3 animate-spin text-primary" />
                       ) : (
                         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                       )}
-                      <span>{isRefreshing ? 'Syncing...' : `Auto-refresh in ${countdown}s`}</span>
+                      <span className="whitespace-nowrap">{isRefreshing ? 'Syncing...' : `Auto-refresh in ${countdown}s`}</span>
                     </div>
                   </div>
                 </div>

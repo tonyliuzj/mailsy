@@ -186,18 +186,73 @@ export default function Home({
       });
   }, [user]);
 
-  
+
   const generateRandomPrefix = () => {
-    const adjectives = ['quick', 'swift', 'fast', 'rapid', 'instant', 'speedy', 'hasty', 'nimble'];
-    const nouns = ['mail', 'email', 'message', 'letter', 'note', 'memo', 'dispatch', 'courier'];
+    const adjectives = [
+      'happy', 'sunny', 'bright', 'swift', 'quick', 'clever', 'smart', 'wise',
+      'brave', 'bold', 'calm', 'cool', 'warm', 'kind', 'gentle', 'sweet',
+      'smooth', 'sharp', 'clear', 'pure', 'fresh', 'crisp', 'light', 'dark',
+      'silver', 'golden', 'crystal', 'cosmic', 'magic', 'mystic', 'royal', 'noble',
+      'lucky', 'grand', 'epic', 'mighty', 'super', 'mega', 'ultra', 'hyper',
+      'wild', 'free', 'true', 'real', 'rad', 'ace', 'top', 'prime',
+      'zen', 'chill', 'sleek', 'slick', 'snappy', 'zippy', 'bouncy', 'fuzzy',
+      'cozy', 'jolly', 'merry', 'perky', 'spry', 'vivid', 'zesty', 'peppy'
+    ];
+
+    const nouns = [
+      'fox', 'wolf', 'bear', 'lion', 'tiger', 'eagle', 'hawk', 'raven',
+      'dragon', 'phoenix', 'falcon', 'panda', 'koala', 'otter', 'lynx', 'cobra',
+      'star', 'moon', 'sun', 'sky', 'cloud', 'rain', 'storm', 'wind',
+      'ocean', 'wave', 'river', 'lake', 'forest', 'mountain', 'valley', 'peak',
+      'flame', 'spark', 'ember', 'blaze', 'frost', 'snow', 'ice', 'mist',
+      'thunder', 'bolt', 'flash', 'beam', 'ray', 'glow', 'shine', 'gleam',
+      'ninja', 'ranger', 'knight', 'wizard', 'sage', 'scout', 'pilot', 'rider',
+      'quest', 'dream', 'hope', 'wish', 'vibe', 'pulse', 'flow', 'rhythm'
+    ];
+
     const randomAdj = adjectives[Math.floor(Math.random() * adjectives.length)];
     const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
-    const randomNumber = Math.floor(Math.random() * 1000);
+    const randomNumber = Math.floor(Math.random() * 9000) + 1000; // 4-digit number (1000-9999)
+
     return `${randomAdj}${randomNoun}${randomNumber}`;
   };
 
-  const handleRandomClick = () => {
-    const randomPrefix = generateRandomPrefix();
+  const checkEmailExists = async (email, domain) => {
+    try {
+      const res = await fetch('/api/check-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, domainName: domain }),
+      });
+      const data = await res.json();
+      return data.exists;
+    } catch (error) {
+      console.error('Error checking email:', error);
+      return false;
+    }
+  };
+
+  const handleRandomClick = async () => {
+    let randomPrefix;
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    // Keep generating until we find a unique email or reach max attempts
+    do {
+      randomPrefix = generateRandomPrefix();
+      attempts++;
+
+      if (attempts >= maxAttempts) {
+        // If we've tried too many times, just use the last one
+        break;
+      }
+
+      const exists = await checkEmailExists(randomPrefix, selectedDomain);
+      if (!exists) {
+        break;
+      }
+    } while (attempts < maxAttempts);
+
     setEmailInput(randomPrefix);
   };
 
@@ -311,19 +366,19 @@ export default function Home({
   if (user) {
     return (
       <Layout siteTitle={siteTitle}>
-        <div className="flex-grow flex justify-center items-center p-4">
+        <div className="flex-grow flex justify-center items-center p-2 sm:p-4">
           <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-500">
             <Card className="h-fit backdrop-blur-sm bg-card/95 border-primary/10 shadow-2xl">
-              <CardHeader className="pb-4">
+              <CardHeader className="pb-4 px-4 sm:px-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-2xl font-bold text-foreground transition-colors">
+                  <h2 className="text-xl sm:text-2xl font-bold text-foreground transition-colors">
                     Welcome Back!
                   </h2>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
                 <div className="text-center">
-                  <p className="text-sm text-muted-foreground transition-colors">
+                  <p className="text-xs sm:text-sm text-muted-foreground transition-colors">
                     You are already logged in.
                   </p>
                 </div>
@@ -354,11 +409,11 @@ export default function Home({
 
   return (
     <Layout siteTitle={siteTitle}>
-      <div className="flex-grow flex justify-center items-center p-4">
-        <div className="flex flex-col md:flex-row gap-6 w-full max-w-5xl items-start justify-center animate-in fade-in zoom-in-95 duration-500">
+      <div className="flex-grow flex justify-center items-center p-2 sm:p-4">
+        <div className="flex flex-col md:flex-row gap-4 md:gap-6 w-full max-w-5xl items-start justify-center animate-in fade-in zoom-in-95 duration-500">
           <div className="w-full max-w-md">
             <Card className="h-fit backdrop-blur-sm bg-card/95 border-primary/10 shadow-2xl">
-              <CardHeader className="pb-6">
+              <CardHeader className="pb-4 sm:pb-6 px-4 sm:px-6">
                 <div className="bg-muted/50 p-1 rounded-lg flex relative">
                   <div
                     className={`absolute inset-y-1 w-[calc(50%-4px)] bg-background shadow-sm rounded-md transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
@@ -367,7 +422,7 @@ export default function Home({
                   />
                   <button
                     onClick={() => setIsLoginView(false)}
-                    className={`flex-1 relative z-10 py-2 text-sm font-medium rounded-md transition-colors duration-300 ${
+                    className={`flex-1 relative z-10 py-2 text-xs sm:text-sm font-medium rounded-md transition-colors duration-300 ${
                       !isLoginView ? 'text-foreground' : 'text-muted-foreground hover:text-foreground/80'
                     }`}
                   >
@@ -375,7 +430,7 @@ export default function Home({
                   </button>
                   <button
                     onClick={() => setIsLoginView(true)}
-                    className={`flex-1 relative z-10 py-2 text-sm font-medium rounded-md transition-colors duration-300 ${
+                    className={`flex-1 relative z-10 py-2 text-xs sm:text-sm font-medium rounded-md transition-colors duration-300 ${
                       isLoginView ? 'text-foreground' : 'text-muted-foreground hover:text-foreground/80'
                     }`}
                   >
@@ -383,15 +438,15 @@ export default function Home({
                   </button>
                 </div>
               </CardHeader>
-              
-              <CardContent className="space-y-6">
+
+              <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
                 {isLoginView ? (
                   <>
                     <div className="text-center">
-                      <h2 className="text-2xl font-bold text-foreground transition-colors">
+                      <h2 className="text-xl sm:text-2xl font-bold text-foreground transition-colors">
                         Login to Your Account
                       </h2>
-                      <p className="text-sm text-muted-foreground transition-colors">
+                      <p className="text-xs sm:text-sm text-muted-foreground transition-colors">
                         Enter your credentials to access your account.
                       </p>
                     </div>
@@ -447,10 +502,10 @@ export default function Home({
                 ) : (
                   <>
                     <div className="text-center">
-                      <h2 className="text-2xl font-bold text-foreground transition-colors">
+                      <h2 className="text-xl sm:text-2xl font-bold text-foreground transition-colors">
                         Create Email Address
                       </h2>
-                      <p className="text-sm text-muted-foreground transition-colors">
+                      <p className="text-xs sm:text-sm text-muted-foreground transition-colors">
                         Create your persistent email address with login credentials
                       </p>
                     </div>

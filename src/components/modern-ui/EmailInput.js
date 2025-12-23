@@ -34,19 +34,10 @@ export function EmailInput({
     return domain ? `${localValue}@${domain.name}` : localValue;
   };
 
-  const generateRandomPrefix = () => {
-    const adjectives = ['quick', 'swift', 'fast', 'rapid', 'instant', 'speedy', 'hasty', 'nimble'];
-    const nouns = ['mail', 'email', 'message', 'letter', 'note', 'memo', 'dispatch', 'courier'];
-    const randomAdj = adjectives[Math.floor(Math.random() * adjectives.length)];
-    const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
-    const randomNumber = Math.floor(Math.random() * 1000);
-    return `${randomAdj}${randomNoun}${randomNumber}`;
-  };
-
   const handleRandomClick = () => {
-    const randomPrefix = generateRandomPrefix();
-    setLocalValue(randomPrefix);
-    onChange(randomPrefix);
+    if (onRandom) {
+      onRandom();
+    }
   };
 
   if (domains.length === 0) {
@@ -66,21 +57,21 @@ export function EmailInput({
           {label}
         </label>
       )}
-      <div className="flex gap-2 overflow-visible">
-        <div className="flex-1 flex relative z-10 overflow-visible">
+      <div className="flex flex-col sm:flex-row gap-2 overflow-visible">
+        <div className="flex-1 flex flex-col sm:flex-row relative z-10 overflow-visible">
           <ShadcnInput
             type="text"
             value={localValue}
             onChange={handleInputChange}
             placeholder={placeholder}
             disabled={disabled}
-            className="flex-1 rounded-r-none"
+            className="flex-1 sm:rounded-r-none rounded-b-none sm:rounded-b-md"
           />
           <select
             value={selectedDomain}
             onChange={(e) => onDomainChange(e.target.value)}
             disabled={disabled}
-            className="appearance-none h-9 bg-background border border-l-0 border-input px-3 py-1 pr-8 text-base text-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded-r-md relative z-20"
+            className="appearance-none h-9 bg-background border sm:border-l-0 border-t-0 sm:border-t border-input px-3 py-1 pr-8 text-sm sm:text-base text-foreground focus:outline-none focus:ring-2 focus:ring-ring sm:rounded-r-md rounded-t-none sm:rounded-t-md rounded-b-md relative z-20 min-w-0"
           >
             {domains.map(domain => (
               <option key={domain.id} value={domain.name}>
@@ -88,7 +79,7 @@ export function EmailInput({
               </option>
             ))}
           </select>
-          <ChevronDown className="absolute right-2 top-2.5 h-4 w-4 opacity-50 pointer-events-none z-30" />
+          <ChevronDown className="absolute right-2 bottom-2.5 sm:top-2.5 h-4 w-4 opacity-50 pointer-events-none z-30" />
         </div>
         {onRandom && (
           <Button
@@ -96,12 +87,13 @@ export function EmailInput({
             onClick={handleRandomClick}
             disabled={disabled}
             variant="outline"
+            className="w-full sm:w-auto"
           >
             Random
           </Button>
         )}
       </div>
-      <div className="text-sm text-muted-foreground">
+      <div className="text-sm text-muted-foreground break-all">
         Full email: <span className="font-mono bg-muted px-2 py-1 rounded text-foreground">
           {getDisplayText()}
         </span>
